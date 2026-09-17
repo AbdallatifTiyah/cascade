@@ -1,19 +1,18 @@
 // Cascade — Real Estate Investment & Development Platform
-// Data model. Written to be portable between SQLite (local/demo) and
-// PostgreSQL (production) — no native enum/array types are used, so the
-// only change needed to go to production is the `datasource.provider`
-// below plus a `prisma migrate dev` against a real Postgres URL.
+// Data model. Runs on PostgreSQL (works locally against any Postgres
+// instance, and on managed providers like Neon/Supabase for deployment —
+// Vercel's serverless functions have no persistent disk, so SQLite isn't an
+// option in production).
 //
 // "Enum-like" string fields are validated at the application boundary
-// (see src/lib/constants.ts) rather than at the database level, which is
-// what keeps this schema identical across both providers.
+// (see src/lib/constants.ts) rather than at the database level.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
