@@ -1,0 +1,422 @@
+// Cascade — Real Estate Investment & Development Platform
+// Data model. Written to be portable between SQLite (local/demo) and
+// PostgreSQL (production) — no native enum/array types are used, so the
+// only change needed to go to production is the `datasource.provider`
+// below plus a `prisma migrate dev` against a real Postgres URL.
+//
+// "Enum-like" string fields are validated at the application boundary
+// (see src/lib/constants.ts) rather than at the database level, which is
+// what keeps this schema identical across both providers.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & access
+// ---------------------------------------------------------------------------
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  phone             String?   @unique
+  passwordHash      String
+  role              String    @default("CUSTOMER") // CUSTOMER | ADMIN
+  firstName         String
+  lastName          String
+  avatarSeed        String    @default("blue")
+  emailVerifiedAt   DateTime?
+  phoneVerifiedAt   DateTime?
+  otpCode           String?
+  otpExpiresAt      DateTime?
+  leadStatus        String    @default("NEW") // NEW | INTERESTED | MATCHED | RESERVED | COMPLETED
+  onboardingStep    Int       @default(0)
+  onboardingDone    Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  preference        PropertyPreference?
+  participants      ProjectParticipant[]
+  reservations      Reservation[]
+  notifications     Notification[]
+  matchingResults   MatchingResult[]
+  auditLogs         AuditLog[]
+  events            AnalyticsEvent[]
+
+  @@index([role])
+  @@index([leadStatus])
+}
+
+// ---------------------------------------------------------------------------
+// Locations (data-driven, not hardcoded in UI)
+// ---------------------------------------------------------------------------
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  region    String?
+  country   String   @default("Palestine")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  preferences PreferenceLocation[]
+  lands       Land[]
+  projects    Project[]
+  segments    DemandSegment[]
+}
+
+// ---------------------------------------------------------------------------
+// Demand data — the core strategic asset
+// ---------------------------------------------------------------------------
+
+model PropertyPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  propertyType      String   @default("APARTMENT") // APARTMENT | VILLA | INVESTMENT
+  bedrooms          String   // "1" | "2" | "3" | "4_PLUS"
+  minSize           Float
+  maxSize           Float
+  downPaymentMin    Float
+  downPaymentMax    Float
+  monthlyMin        Float
+  monthlyMax        Float
+  durationMinYears  Int
+  durationMaxYears  Int
+  amenities         String   @default("[]") // JSON string array of amenity keys
+  timeline          String   // ASAP | WITHIN_1_YEAR | Y2_3 | Y3_5 | FLEXIBLE
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  locations         PreferenceLocation[]
+
+  @@index([bedrooms])
+  @@index([timeline])
+}
+
+model PreferenceLocation {
+  id           String             @id @default(cuid())
+  preferenceId String
+  preference   PropertyPreference @relation(fields: [preferenceId], references: [id], onDelete: Cascade)
+  locationId   String
+  location     Location           @relation(fields: [locationId], references: [id])
+
+  @@unique([preferenceId, locationId])
+}
+
+model DemandSegment {
+  id          String   @id @default(cuid())
+  name        String
+  locationId  String?
+  location    Location? @relation(fields: [locationId], references: [id])
+  minBedrooms String?
+  maxBedrooms String?
+  minBudget   Float?
+  maxBudget   Float?
+  minSize     Float?
+  maxSize     Float?
+  createdAt   DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Land opportunities
+// ---------------------------------------------------------------------------
+
+model Land {
+  id                    String   @id @default(cuid())
+  name                  String
+  locationId            String
+  location              Location @relation(fields: [locationId], references: [id])
+  area                  Float
+  price                 Float
+  expectedBuildableArea Float
+  allowedFloors         Int
+  potentialApartments   Int
+  parkingSpaces         Int      @default(0)
+  notes                 String?
+  status                String   @default("AVAILABLE") // AVAILABLE | UNDER_REVIEW | ACQUIRED | ARCHIVED
+  latitude              Float?
+  longitude             Float?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  projects              Project[]
+  feasibilities         ProjectFeasibility[]
+}
+
+// ---------------------------------------------------------------------------
+// Projects & inventory
+// ---------------------------------------------------------------------------
+
+model Project {
+  id                       String   @id @default(cuid())
+  name                     String
+  slug                     String   @unique
+  description              String
+  locationId               String
+  location                 Location @relation(fields: [locationId], references: [id])
+  landId                   String?
+  land                     Land?    @relation(fields: [landId], references: [id])
+
+  status                   String   @default("PLANNING")
+  // DRAFT | PLANNING | FUNDRAISING | LAND_SECURED | CONSTRUCTION | FINISHING | COMPLETED | HANDOVER
+
+  totalFloors              Int
+  totalApartments          Int
+  parkingAvailable         Boolean  @default(true)
+  elevatorAvailable        Boolean  @default(true)
+  amenities                String   @default("[]")
+  coverTheme               String   @default("slate")
+  estimatedDeliveryDate    DateTime
+
+  landCostEstimate         Float    @default(0)
+  constructionCostEstimate Float    @default(0)
+  otherCostsEstimate       Float    @default(0)
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  apartments               Apartment[]
+  participants             ProjectParticipant[]
+  reservations             Reservation[]
+  constructionStages       ConstructionStage[]
+  updates                  ProjectUpdate[]
+  matchingResults          MatchingResult[]
+  feasibilities            ProjectFeasibility[]
+
+  @@index([locationId])
+  @@index([status])
+}
+
+model Apartment {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  code            String   // e.g. A501
+  floor           Int
+  area            Float
+  bedrooms        Int
+  bathrooms       Int
+  hasBalcony      Boolean  @default(false)
+  view            String   @default("City")
+  parkingIncluded Boolean  @default(false)
+  features        String   @default("[]")
+  price           Float
+  downPayment     Float
+  monthlyPayment  Float
+  durationMonths  Int
+  status          String   @default("AVAILABLE")
+  // AVAILABLE | RESERVED | ALLOCATED | UNAVAILABLE | COMPLETED
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  participants    ProjectParticipant[]
+  reservations    Reservation[]
+
+  @@unique([projectId, code])
+  @@index([status])
+}
+
+model ProjectParticipant {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentId String?
+  apartment   Apartment? @relation(fields: [apartmentId], references: [id])
+  status      String    @default("JOINED") // JOINED | ALLOCATED | COMPLETED
+  joinedAt    DateTime  @default(now())
+
+  @@unique([projectId, userId])
+}
+
+// ---------------------------------------------------------------------------
+// Reservations & payments
+// ---------------------------------------------------------------------------
+
+model Reservation {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id])
+  apartmentId     String
+  apartment       Apartment @relation(fields: [apartmentId], references: [id])
+  status          String    @default("CONFIRMED") // PENDING | CONFIRMED | CANCELLED | EXPIRED
+  expiresAt       DateTime?
+  confirmedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  paymentPlan     PaymentPlan?
+
+  @@index([userId])
+  @@index([apartmentId])
+}
+
+model PaymentPlan {
+  id              String      @id @default(cuid())
+  reservationId   String      @unique
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  totalAmount     Float
+  downPayment     Float
+  remainingAmount Float
+  monthlyAmount   Float
+  durationMonths  Int
+  startDate       DateTime
+  createdAt       DateTime    @default(now())
+
+  payments        Payment[]
+}
+
+model Payment {
+  id            String      @id @default(cuid())
+  paymentPlanId String
+  paymentPlan   PaymentPlan @relation(fields: [paymentPlanId], references: [id], onDelete: Cascade)
+  label         String      // e.g. "Down payment", "Installment 1"
+  amount        Float
+  dueDate       DateTime
+  paidDate      DateTime?
+  status        String      @default("UPCOMING") // UPCOMING | PAID | OVERDUE
+  method        String?
+  reference     String?
+  createdAt     DateTime    @default(now())
+
+  @@index([paymentPlanId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Construction & communication
+// ---------------------------------------------------------------------------
+
+model ConstructionStage {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  sequence    Int
+  status      String    @default("PENDING") // PENDING | IN_PROGRESS | COMPLETE
+  plannedDate DateTime?
+  actualDate  DateTime?
+  description String?
+  imageNote   String?
+  updatedAt   DateTime  @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectUpdate {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  body        String
+  publishedAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // RESERVATION | PAYMENT_REMINDER | PROJECT_UPDATE | CONSTRUCTION_UPDATE | AVAILABILITY | ANNOUNCEMENT
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ---------------------------------------------------------------------------
+// Matching engine (explainable & auditable)
+// ---------------------------------------------------------------------------
+
+model MatchingConfiguration {
+  id        String   @id @default(cuid())
+  name      String
+  weights   String   // JSON: { location, monthly, initial, size, bedrooms, timeline, duration, amenities }
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model MatchingResult {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  overallScore Float
+  breakdown    String   // JSON array of { key, label, score, weight, explanation }
+  weightsUsed  String   // JSON snapshot of weights at time of computation
+  computedAt   DateTime @default(now())
+
+  @@unique([userId, projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Feasibility & land scoring
+// ---------------------------------------------------------------------------
+
+model ProjectFeasibility {
+  id                  String   @id @default(cuid())
+  projectId           String?
+  project             Project? @relation(fields: [projectId], references: [id])
+  landId              String?
+  land                Land?    @relation(fields: [landId], references: [id])
+
+  landCost            Float
+  constructionCost    Float
+  otherCosts          Float
+  numApartments       Int
+  avgApartmentPrice   Float
+
+  totalCost           Float
+  totalRevenue        Float
+  grossMargin         Float
+  costPerUnit         Float
+  revenuePerUnit      Float
+  demandCoverage      Float
+  requiredParticipants Int
+  potentialParticipants Int
+
+  createdAt           DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Audit & analytics
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String   // onboarding_started, project_viewed, apartment_selected, ...
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([name])
+}
