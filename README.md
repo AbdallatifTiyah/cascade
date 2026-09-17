@@ -146,7 +146,7 @@ project — see the deployment section below).
 
 ```bash
 npm install
-cp .env.example .env        # then set DATABASE_URL to your Postgres instance
+cp .env.example .env        # then set DATABASE_URL (and DIRECT_URL) to your Postgres instance
 npm run db:push             # create the schema
 npm run db:seed             # seed realistic demo data (120 users, 6 projects, 8 lands, reservations…)
 npm run dev
@@ -158,8 +158,12 @@ as a new customer.
 ### Environment variables
 
 See `.env.example`. `DATABASE_URL` must point at a real Postgres instance —
-there is no zero-config fallback. Generate a real `AUTH_SECRET` with
-`openssl rand -base64 32` for anything beyond a throwaway local run.
+there is no zero-config fallback. `DIRECT_URL` is only relevant for
+connection-pooled providers like Supabase (see below); for a plain Postgres
+instance or Neon, set it to the exact same value as `DATABASE_URL` — Prisma
+requires the variable to exist even when it's unused. Generate a real
+`AUTH_SECRET` with `openssl rand -base64 32` for anything beyond a throwaway
+local run.
 
 ### Resetting or re-seeding
 
@@ -175,41 +179,56 @@ screen exercised) but never deployed to a live URL from there, since that
 environment had no hosting credentials — these are the exact steps to do it
 from your own account.
 
-**1. Create a free Postgres database (Neon is the fastest):**
-- Go to https://neon.tech → sign in with GitHub → **New Project**.
-- Copy the connection string it gives you (starts with `postgresql://...`,
-  include `?sslmode=require` if Neon adds it).
+**1. Create a free Postgres database — Neon or Supabase both work:**
+
+*Neon:*
+- https://neon.tech → sign in with GitHub → **New Project**.
+- Copy the connection string it gives you and use it for **both**
+  `DATABASE_URL` and `DIRECT_URL` below.
+
+*Supabase:*
+- https://supabase.com → sign in with GitHub → **New Project**.
+- Go to **Project Settings → Database → Connection string**.
+- Use the **"Transaction" pooler string** (port `6543`, includes
+  `?pgbouncer=true`) for `DATABASE_URL` — required because serverless
+  functions open many short-lived connections that would otherwise exhaust
+  Postgres' direct connection limit.
+- Use the **"Session" / direct string** (port `5432`, no `pgbouncer` param)
+  for `DIRECT_URL` — Prisma needs an unpooled connection to run
+  `db push`/migrations, since the transaction pooler doesn't support them.
 
 **2. Import the project into Vercel** (the screen you're on):
 - **Root Directory:** `./` (leave as-is).
 - **Framework Preset:** change it from "Other" to **Next.js** — Vercel should
   then fill in the Build/Install/Output commands correctly on its own
   (`npm run build`, `npm install`, and no explicit output directory needed).
-- **Branch to deploy:** make sure it's `claude/bold-wozniak-vucqsy`, not
-  `main` — that's the branch with the actual app; `main` still only has the
-  original empty placeholder commit.
+- **Branch to deploy:** whichever branch has this app on it (not an empty
+  placeholder branch/commit, if this repo started from one).
 
-**3. Environment variables** — add these four under "Environments" before
+**3. Environment variables** — add these under "Environments" before
 deploying:
 
 | Key | Value |
 |---|---|
-| `DATABASE_URL` | the Neon connection string from step 1 |
+| `DATABASE_URL` | pooled connection string (Supabase) or your connection string (Neon) |
+| `DIRECT_URL` | direct connection string (Supabase) or the same value as `DATABASE_URL` (Neon) |
 | `AUTH_SECRET` | any long random string (e.g. generate one at https://generate-secret.vercel.app/32) |
 | `NEXTAUTH_URL` | your Vercel URL, e.g. `https://cascade-yourname.vercel.app` (you can add/fix this after the first deploy once Vercel assigns the domain) |
 | `NEXT_PUBLIC_DEFAULT_CURRENCY` | `USD` |
 
 **4. Deploy.** Vercel will run `npm install` and `npm run build`. `prisma
-generate` runs automatically as part of `npm install` (it's a Prisma
-postinstall hook), so the client is always in sync with the schema.
+generate` runs automatically as part of `npm install` (via the `postinstall`
+script in `package.json`), so the client is always in sync with the schema.
 
 **5. Create tables and seed demo data — one time, after the first deploy:**
-run this from your own machine (with Vercel CLI: `vercel env pull` to get
-`DATABASE_URL` locally), or from this sandbox/any machine with Node:
+run this from your own machine (with Vercel CLI: `vercel env pull` to get the
+variables locally), or from any machine with Node — use the **direct**
+connection string for both commands here, even on Supabase, since `db push`
+needs it:
 
 ```bash
-DATABASE_URL="<your Neon connection string>" npx prisma db push
-DATABASE_URL="<your Neon connection string>" npx tsx prisma/seed.ts
+DATABASE_URL="<your direct connection string>" npx prisma db push
+DATABASE_URL="<your direct connection string>" npx tsx prisma/seed.ts
 ```
 
 After that, redeploying from Vercel (e.g. a new push to the branch) reuses

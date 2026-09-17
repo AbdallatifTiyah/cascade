@@ -12,8 +12,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Only needed for connection-pooled providers (e.g. Supabase's pooler on
+  // port 6543): schema pushes/migrations need a direct, unpooled connection.
+  // Safe to leave unset (falls back to DATABASE_URL) for a plain Postgres
+  // instance or Neon.
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------
