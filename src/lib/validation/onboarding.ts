@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { BEDROOM_OPTIONS, PROPERTY_TYPES, TIMELINE_OPTIONS } from "@/lib/constants";
+import { BEDROOM_OPTIONS, PROPERTY_TYPES, TIMELINE_OPTIONS, EMPLOYMENT_STATUSES } from "@/lib/constants";
 
 const bedroomValues = BEDROOM_OPTIONS.map((b) => b.value) as [string, ...string[]];
 const propertyTypeValues = PROPERTY_TYPES.map((p) => p.value) as [string, ...string[]];
 const timelineValues = TIMELINE_OPTIONS.map((t) => t.value) as [string, ...string[]];
+const employmentStatusValues = EMPLOYMENT_STATUSES.map((e) => e.value) as [string, ...string[]];
 
 export const propertyPreferenceSchema = z
   .object({
@@ -20,6 +21,12 @@ export const propertyPreferenceSchema = z
     durationMaxYears: z.number().int().min(1).max(30),
     amenities: z.array(z.string()).default([]),
     timeline: z.enum(timelineValues),
+    employmentStatus: z.enum(employmentStatusValues),
+    jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
+    employerName: z.string().trim().max(120).optional().or(z.literal("")),
+    industry: z.string().trim().max(120).optional().or(z.literal("")),
+    monthlyIncome: z.number().nonnegative().optional(),
+    yearsExperience: z.number().int().nonnegative().max(80).optional(),
   })
   .refine((data) => data.maxSize >= data.minSize, {
     message: "Maximum size must be greater than minimum size",

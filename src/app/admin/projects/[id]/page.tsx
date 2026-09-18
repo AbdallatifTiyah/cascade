@@ -6,6 +6,7 @@ import { calculateProjectFeasibility } from "@/lib/feasibility/engine";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ProjectStatusControl } from "@/components/admin/project-status-control";
 import { ConstructionStageEditor } from "@/components/admin/construction-stage-editor";
@@ -137,6 +138,7 @@ export default async function AdminProjectDetailPage({ params }: { params: Promi
                 <TableHead>Area</TableHead>
                 <TableHead>Bedrooms</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Annual fees</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -145,11 +147,18 @@ export default async function AdminProjectDetailPage({ params }: { params: Promi
                 const style = APARTMENT_STATUS_STYLE[a.status] ?? APARTMENT_STATUS_STYLE.UNAVAILABLE;
                 return (
                   <TableRow key={a.id}>
-                    <TableCell className="font-tabular font-medium">{a.code}</TableCell>
+                    <TableCell className="font-tabular font-medium">
+                      <Link href={`/admin/apartments/${a.id}`} className="hover:underline">
+                        {a.code}
+                      </Link>
+                    </TableCell>
                     <TableCell>{a.floor}</TableCell>
                     <TableCell className="font-tabular">{a.area} m²</TableCell>
                     <TableCell>{a.bedrooms}</TableCell>
                     <TableCell className="font-tabular">{formatCurrency(a.price)}</TableCell>
+                    <TableCell className="font-tabular text-muted-foreground">
+                      {formatCurrency(a.serviceFeeAnnual + a.managementFeeAnnual + a.maintenanceFeeAnnual)}/yr
+                    </TableCell>
                     <TableCell>
                       <Badge className={style.className} variant="outline">
                         {style.label}

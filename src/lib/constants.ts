@@ -108,6 +108,20 @@ export const CONSTRUCTION_STAGE_TEMPLATE = [
 export const LEAD_STATUSES = ["NEW", "INTERESTED", "MATCHED", "RESERVED", "COMPLETED"] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
+export const EMPLOYMENT_STATUSES = [
+  { value: "EMPLOYED", label: "Employed" },
+  { value: "SELF_EMPLOYED", label: "Self-employed" },
+  { value: "BUSINESS_OWNER", label: "Business owner" },
+  { value: "RETIRED", label: "Retired" },
+  { value: "STUDENT", label: "Student" },
+  { value: "UNEMPLOYED", label: "Unemployed" },
+] as const;
+export type EmploymentStatus = (typeof EMPLOYMENT_STATUSES)[number]["value"];
+
+export function employmentStatusLabel(value: string): string {
+  return EMPLOYMENT_STATUSES.find((e) => e.value === value)?.label ?? value;
+}
+
 export const COVER_THEMES = [
   "slate",
   "emerald",

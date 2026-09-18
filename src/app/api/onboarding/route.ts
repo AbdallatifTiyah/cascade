@@ -59,7 +59,17 @@ export async function POST(request: Request) {
 
   await db.user.update({
     where: { id: userId },
-    data: { onboardingDone: true, onboardingStep: 7, leadStatus: "MATCHED" },
+    data: {
+      onboardingDone: true,
+      onboardingStep: 7,
+      leadStatus: "MATCHED",
+      employmentStatus: data.employmentStatus,
+      jobTitle: data.jobTitle || null,
+      employerName: data.employerName || null,
+      industry: data.industry || null,
+      monthlyIncome: data.monthlyIncome ?? null,
+      yearsExperience: data.yearsExperience ?? null,
+    },
   });
 
   await recordAudit({ actorId: userId, action: "PROPERTY_PROFILE_SAVED", entityType: "PropertyPreference", entityId: userId });

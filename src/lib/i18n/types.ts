@@ -169,6 +169,13 @@ export interface Dictionary {
     bedroomsWord: string;
     sizeHint: string;
     amenitiesHint: string;
+    employmentHint: string;
+    jobTitle: string;
+    employerName: string;
+    industry: string;
+    yearsExperience: string;
+    monthlyIncome: string;
+    employmentPrivacyNote: string;
   };
   myProject: {
     title: string;
@@ -207,6 +214,7 @@ export interface Dictionary {
     tabDocuments: string;
     tabSecurity: string;
     personalInfoTitle: string;
+    employmentInfoTitle: string;
     noPropertyTitle: string;
     noPropertyDesc: string;
     paymentMethodsTitle: string;

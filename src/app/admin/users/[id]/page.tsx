@@ -10,6 +10,7 @@ import { LeadStatusControl } from "@/components/admin/lead-status-control";
 import { PropertyProfileCard } from "@/components/projects/property-profile-card";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/utils";
+import { employmentStatusLabel } from "@/lib/constants";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -66,6 +67,26 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           <CardContent className="p-5 text-sm text-muted-foreground">This user hasn't completed onboarding yet.</CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Employment &amp; business</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {user.employmentStatus ? (
+            <dl className="grid grid-cols-2 gap-5 sm:grid-cols-3">
+              <Stat label="Status" value={employmentStatusLabel(user.employmentStatus)} />
+              <Stat label="Job title" value={user.jobTitle || "—"} />
+              <Stat label="Company / business" value={user.employerName || "—"} />
+              <Stat label="Industry" value={user.industry || "—"} />
+              <Stat label="Years of experience" value={user.yearsExperience != null ? String(user.yearsExperience) : "—"} />
+              <Stat label="Monthly income" value={user.monthlyIncome != null ? formatCurrency(user.monthlyIncome) : "—"} />
+            </dl>
+          ) : (
+            <p className="text-sm text-muted-foreground">No employment information provided yet.</p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -128,6 +149,15 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-1 font-tabular text-sm font-semibold">{value}</dd>
     </div>
   );
 }

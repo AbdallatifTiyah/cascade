@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PersonalInfoForm } from "@/components/account/personal-info-form";
+import { EmploymentInfoForm } from "@/components/account/employment-info-form";
 import { PasswordForm } from "@/components/account/password-form";
 import { LogoutButton } from "@/components/account/logout-button";
 import { PropertyProfileCard } from "@/components/projects/property-profile-card";
@@ -49,6 +50,25 @@ export default async function AccountPage() {
             </CardHeader>
             <CardContent>
               <PersonalInfoForm user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone }} locale={locale} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t.employmentInfoTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EmploymentInfoForm
+                user={{
+                  employmentStatus: user.employmentStatus,
+                  jobTitle: user.jobTitle,
+                  employerName: user.employerName,
+                  industry: user.industry,
+                  monthlyIncome: user.monthlyIncome,
+                  yearsExperience: user.yearsExperience,
+                }}
+                locale={locale}
+              />
             </CardContent>
           </Card>
         </TabsContent>

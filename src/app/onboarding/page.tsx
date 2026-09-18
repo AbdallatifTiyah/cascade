@@ -31,6 +31,12 @@ export default async function OnboardingPage() {
       durationMaxYears: preference.durationMaxYears,
       amenities: JSON.parse(preference.amenities || "[]"),
       timeline: preference.timeline,
+      employmentStatus: user.employmentStatus ?? "",
+      jobTitle: user.jobTitle ?? "",
+      employerName: user.employerName ?? "",
+      industry: user.industry ?? "",
+      monthlyIncome: user.monthlyIncome ?? "",
+      yearsExperience: user.yearsExperience ?? "",
     };
   }
 

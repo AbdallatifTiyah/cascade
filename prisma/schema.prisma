@@ -44,6 +44,15 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // Employment / business info, collected for investor due-diligence
+  // (KYC-style profiling) rather than for property matching.
+  employmentStatus  String?   // EMPLOYED | SELF_EMPLOYED | BUSINESS_OWNER | RETIRED | STUDENT | UNEMPLOYED
+  jobTitle          String?
+  employerName      String?   // company name, or business name if self-employed/owner
+  industry          String?
+  monthlyIncome     Float?
+  yearsExperience   Int?
+
   preference        PropertyPreference?
   participants      ProjectParticipant[]
   reservations      Reservation[]

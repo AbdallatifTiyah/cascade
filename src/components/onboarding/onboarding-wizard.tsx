@@ -12,9 +12,10 @@ import {
   BEDROOM_OPTIONS,
   PROPERTY_TYPES,
   TIMELINE_OPTIONS,
+  EMPLOYMENT_STATUSES,
 } from "@/lib/constants";
 import { getDictionary, type Locale } from "@/lib/i18n";
-import { localizedPropertyType, localizedBedroom, localizedTimeline, localizedAmenity } from "@/lib/i18n/labels";
+import { localizedPropertyType, localizedBedroom, localizedTimeline, localizedAmenity, localizedEmploymentStatus } from "@/lib/i18n/labels";
 
 export interface OnboardingDraft {
   locationIds: string[];
@@ -30,6 +31,12 @@ export interface OnboardingDraft {
   durationMaxYears: number;
   amenities: string[];
   timeline: string;
+  employmentStatus: string;
+  jobTitle: string;
+  employerName: string;
+  industry: string;
+  monthlyIncome: number | "";
+  yearsExperience: number | "";
 }
 
 const DEFAULT_DRAFT: OnboardingDraft = {
@@ -46,10 +53,16 @@ const DEFAULT_DRAFT: OnboardingDraft = {
   durationMaxYears: 7,
   amenities: [],
   timeline: "",
+  employmentStatus: "",
+  jobTitle: "",
+  employerName: "",
+  industry: "",
+  monthlyIncome: "",
+  yearsExperience: "",
 };
 
 const STORAGE_KEY = "cascade.onboarding.draft";
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
 
 const PROPERTY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   APARTMENT: Building2,
@@ -116,6 +129,7 @@ export function OnboardingWizard({
       draft.durationMaxYears >= draft.durationMinYears,
     6: () => true,
     7: () => !!draft.timeline,
+    8: () => !!draft.employmentStatus,
   };
 
   const isStepValid = validators[step]?.() ?? true;
@@ -131,7 +145,11 @@ export function OnboardingWizard({
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
+        body: JSON.stringify({
+          ...draft,
+          monthlyIncome: draft.monthlyIncome === "" ? undefined : draft.monthlyIncome,
+          yearsExperience: draft.yearsExperience === "" ? undefined : draft.yearsExperience,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -156,6 +174,7 @@ export function OnboardingWizard({
     5: t.titles[4],
     6: t.titles[5],
     7: t.titles[6],
+    8: t.titles[7],
   };
 
   return (
@@ -263,6 +282,56 @@ export function OnboardingWizard({
             {TIMELINE_OPTIONS.map((opt) => (
               <OptionCard key={opt.value} selected={draft.timeline === opt.value} onClick={() => update("timeline", opt.value)} title={localizedTimeline(opt.value, locale, opt.label)} />
             ))}
+          </div>
+        )}
+
+        {step === 8 && (
+          <div className="space-y-5">
+            <p className="text-sm text-muted-foreground">{t.employmentHint}</p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {EMPLOYMENT_STATUSES.map((opt) => (
+                <Chip key={opt.value} selected={draft.employmentStatus === opt.value} onClick={() => update("employmentStatus", opt.value)}>
+                  {localizedEmploymentStatus(opt.value, locale, opt.label)}
+                </Chip>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="jobTitle">{t.jobTitle}</Label>
+                <Input id="jobTitle" value={draft.jobTitle} onChange={(e) => update("jobTitle", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employerName">{t.employerName}</Label>
+                <Input id="employerName" value={draft.employerName} onChange={(e) => update("employerName", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="industry">{t.industry}</Label>
+                <Input id="industry" value={draft.industry} onChange={(e) => update("industry", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yearsExperience">{t.yearsExperience}</Label>
+                <Input
+                  id="yearsExperience"
+                  type="number"
+                  min={0}
+                  value={draft.yearsExperience}
+                  onChange={(e) => update("yearsExperience", e.target.value === "" ? "" : Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="monthlyIncome">{t.monthlyIncome}</Label>
+              <Input
+                id="monthlyIncome"
+                type="number"
+                min={0}
+                value={draft.monthlyIncome}
+                onChange={(e) => update("monthlyIncome", e.target.value === "" ? "" : Number(e.target.value))}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{t.employmentPrivacyNote}</p>
           </div>
         )}
       </div>

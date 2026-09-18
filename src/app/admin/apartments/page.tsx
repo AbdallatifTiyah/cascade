@@ -68,7 +68,9 @@ export default async function AdminApartmentsPage({ searchParams }: { searchPara
             <TableHead>Area</TableHead>
             <TableHead>Bedrooms</TableHead>
             <TableHead>Price</TableHead>
+            <TableHead>Annual fees</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,15 +83,27 @@ export default async function AdminApartmentsPage({ searchParams }: { searchPara
                     {a.project.name}
                   </Link>
                 </TableCell>
-                <TableCell className="font-tabular font-medium">{a.code}</TableCell>
+                <TableCell className="font-tabular font-medium">
+                  <Link href={`/admin/apartments/${a.id}`} className="hover:underline">
+                    {a.code}
+                  </Link>
+                </TableCell>
                 <TableCell>{a.floor}</TableCell>
                 <TableCell className="font-tabular">{a.area} m²</TableCell>
                 <TableCell>{a.bedrooms}</TableCell>
                 <TableCell className="font-tabular">{formatCurrency(a.price)}</TableCell>
+                <TableCell className="font-tabular text-muted-foreground">
+                  {formatCurrency(a.serviceFeeAnnual + a.managementFeeAnnual + a.maintenanceFeeAnnual)}/yr
+                </TableCell>
                 <TableCell>
                   <Badge className={style.className} variant="outline">
                     {style.label}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <Link href={`/admin/apartments/${a.id}`} className="text-sm font-medium text-accent hover:underline">
+                    Edit
+                  </Link>
                 </TableCell>
               </TableRow>
             );

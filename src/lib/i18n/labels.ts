@@ -60,6 +60,15 @@ const paymentStatus: Record<string, string> = {
   OVERDUE: "متأخرة",
 };
 
+const employmentStatus: Record<string, string> = {
+  EMPLOYED: "موظف",
+  SELF_EMPLOYED: "عمل حر",
+  BUSINESS_OWNER: "صاحب عمل",
+  RETIRED: "متقاعد",
+  STUDENT: "طالب",
+  UNEMPLOYED: "غير موظف",
+};
+
 function pick(map: Record<string, string>, value: string, locale: Locale, fallback: string): string {
   if (locale === "ar") return map[value] ?? fallback;
   return fallback;
@@ -85,4 +94,7 @@ export function localizedApartmentStatus(value: string, locale: Locale, fallback
 }
 export function localizedPaymentStatus(value: string, locale: Locale, fallback: string) {
   return pick(paymentStatus, value, locale, fallback);
+}
+export function localizedEmploymentStatus(value: string, locale: Locale, fallback: string) {
+  return pick(employmentStatus, value, locale, fallback);
 }
