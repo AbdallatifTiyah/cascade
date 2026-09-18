@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, LoaderCircle } from "lucide-react";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n";
+import { Reveal } from "@/components/ui/reveal";
 
 export function ConstructionTransparency() {
   const locale = getLocale();
@@ -10,10 +11,10 @@ export function ConstructionTransparency() {
   return (
     <section className="border-b border-border bg-secondary/40 py-20 sm:py-28">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        <div className="text-center">
+        <Reveal className="text-center">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.title}</h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">{t.subtitle}</p>
-        </div>
+        </Reveal>
 
         <div className="mt-14 flex flex-col gap-0 sm:flex-row sm:items-start sm:justify-between">
           {t.stages.map((stage, i) => {

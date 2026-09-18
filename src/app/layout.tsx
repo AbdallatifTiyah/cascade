@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { isRtl } from "@/lib/i18n";
+import { plusJakarta, cairo } from "./fonts";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: {
@@ -30,9 +32,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
+  const rtl = isRtl(locale);
   return (
-    <html lang={locale} dir={isRtl(locale) ? "rtl" : "ltr"}>
-      <body className="font-sans antialiased">
+    <html lang={locale} dir={rtl ? "rtl" : "ltr"} className={cn(plusJakarta.variable, cairo.variable)}>
+      <body className={cn(rtl ? "font-arabic" : "font-sans", "antialiased")}>
+        <noscript>
+          <style>{".reveal { opacity: 1 !important; transform: none !important; }"}</style>
+        </noscript>
         <Providers>{children}</Providers>
         <Script id="register-sw" strategy="afterInteractive">
           {`if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); }); }`}

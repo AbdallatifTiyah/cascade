@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 
 // Cascade doesn't hotlink external property photography for the demo build
 // (no image pipeline configured yet) — instead every project gets a
-// deterministic, premium abstract cover derived from its theme. This keeps
-// the UI fast, offline-safe, and consistent with the minimal brand
-// direction rather than looking like a broken-image placeholder.
+// deterministic, premium abstract cover derived from its theme: a layered
+// mesh gradient + grain texture + skyline silhouette, so it reads as
+// designed brand art rather than a placeholder.
 const GRADIENTS: Record<string, string> = {
   slate: "from-slate-700 via-slate-800 to-slate-950",
   emerald: "from-emerald-700 via-emerald-800 to-slate-950",
@@ -15,20 +15,35 @@ const GRADIENTS: Record<string, string> = {
   teal: "from-teal-700 via-slate-800 to-slate-950",
 };
 
+const GLOWS: Record<string, string> = {
+  slate: "rgb(148 163 184 / 0.35)",
+  emerald: "rgb(52 211 153 / 0.35)",
+  amber: "rgb(251 191 36 / 0.35)",
+  indigo: "rgb(129 140 248 / 0.35)",
+  rose: "rgb(251 113 133 / 0.35)",
+  teal: "rgb(45 212 191 / 0.35)",
+};
+
 export function ProjectCover({ theme = "slate", className, children }: { theme?: string; className?: string; children?: React.ReactNode }) {
+  const glow = GLOWS[theme] ?? GLOWS.slate;
   return (
     <div
       className={cn(
-        "relative flex items-center justify-center overflow-hidden bg-gradient-to-br",
+        "bg-grain relative flex items-center justify-center overflow-hidden bg-gradient-to-br",
         GRADIENTS[theme] ?? GRADIENTS.slate,
         className
       )}
     >
-      <svg className="absolute inset-0 h-full w-full opacity-[0.15]" preserveAspectRatio="none" viewBox="0 0 400 300" fill="none">
+      <div
+        className="absolute -top-10 start-1/4 h-40 w-40 rounded-full blur-3xl"
+        style={{ backgroundColor: glow }}
+      />
+      <svg className="absolute inset-0 h-full w-full opacity-[0.18]" preserveAspectRatio="none" viewBox="0 0 400 300" fill="none">
         <path d="M0 300 L60 180 L110 220 L170 100 L230 190 L280 130 L340 210 L400 150 V300 Z" fill="white" />
         <line x1="0" y1="300" x2="400" y2="300" stroke="white" strokeWidth="1" />
       </svg>
-      <Building2 className="relative h-9 w-9 text-white/70" strokeWidth={1.25} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/5" />
+      <Building2 className="relative h-9 w-9 text-white/80 drop-shadow-lg" strokeWidth={1.25} />
       {children}
     </div>
   );

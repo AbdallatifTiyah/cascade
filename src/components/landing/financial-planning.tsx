@@ -3,6 +3,7 @@ import { formatCurrency } from "@/lib/currency";
 import { calculateMonthlyPayment } from "@/lib/finance";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n";
+import { Reveal } from "@/components/ui/reveal";
 
 export function FinancialPlanning() {
   const locale = getLocale();
@@ -12,7 +13,7 @@ export function FinancialPlanning() {
   return (
     <section id="financial-planning" className="border-b border-border py-20 sm:py-28">
       <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
-        <div>
+        <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.title}</h2>
           <p className="mt-4 text-muted-foreground">{t.subtitle}</p>
           <ul className="mt-6 space-y-3 text-sm">
@@ -25,9 +26,10 @@ export function FinancialPlanning() {
               <span className="text-muted-foreground">{t.bullet2}</span>
             </li>
           </ul>
-        </div>
+        </Reveal>
 
-        <Card className="p-6 sm:p-8">
+        <Reveal delay={150}>
+        <Card className="p-6 shadow-elevated sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.exampleLabel}</p>
           <div className="mt-5 space-y-4">
             <Row label={t.rowTotal} value={formatCurrency(example.totalPrice)} />
@@ -39,6 +41,7 @@ export function FinancialPlanning() {
             </div>
           </div>
         </Card>
+        </Reveal>
       </div>
     </section>
   );

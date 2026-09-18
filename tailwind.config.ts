@@ -10,12 +10,20 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
+          "var(--font-jakarta)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
-          "Inter",
           "Helvetica Neue",
           "Arial",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+        arabic: [
+          "var(--font-cairo)",
+          "Tahoma",
+          "Segoe UI",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
@@ -65,16 +73,33 @@ const config: Config = {
       boxShadow: {
         subtle: "0 1px 2px 0 rgb(0 0 0 / 0.04)",
         card: "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)",
-        elevated: "0 4px 24px -4px rgb(0 0 0 / 0.08)",
+        elevated: "0 12px 32px -8px rgb(0 0 0 / 0.14), 0 4px 12px -4px rgb(0 0 0 / 0.08)",
+        glow: "0 0 0 1px hsl(var(--accent) / 0.15), 0 8px 30px -6px hsl(var(--accent) / 0.35)",
+        premium: "0 24px 60px -16px rgb(0 0 0 / 0.22), 0 8px 24px -8px rgb(0 0 0 / 0.12)",
       },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(24px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        shine: {
+          "0%": { backgroundPosition: "200% center" },
+          "100%": { backgroundPosition: "-200% center" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
+        "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+        float: "float 6s ease-in-out infinite",
+        shine: "shine 3s linear infinite",
       },
     },
   },

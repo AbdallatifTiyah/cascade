@@ -64,6 +64,69 @@ body {
   scrollbar-width: none;
 }
 
+/* Premium layered gradient backdrop — used behind hero/section headers for
+   depth instead of a flat color. Multiple soft radial blooms in the brand
+   gold + a faint dark wash, so it reads as "designed" rather than default. */
+.bg-mesh {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, hsl(var(--accent) / 0.16), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, hsl(var(--primary) / 0.08), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 100%, hsl(var(--accent) / 0.08), transparent 60%);
+}
+
+/* Subtle film-grain texture: breaks up flat color fields on large sections
+   so they don't look like a plain CSS gradient. Applied at very low opacity. */
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.text-gradient-gold {
+  background-image: linear-gradient(100deg, hsl(var(--accent)) 0%, hsl(38 70% 62%) 45%, hsl(var(--accent)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn-shine {
+  background-image: linear-gradient(
+    110deg,
+    transparent 30%,
+    hsl(var(--accent-foreground) / 0.35) 45%,
+    hsl(var(--accent-foreground) / 0.35) 55%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+}
+
+/* Scroll-reveal: an IntersectionObserver (see components/ui/reveal.tsx) adds
+   .is-visible when a section enters the viewport. prefers-reduced-motion
+   users get the fully-visible state immediately, never a stuck-hidden one. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
