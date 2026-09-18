@@ -1,4 +1,4 @@
-import { calculateMonthlyPayment } from "@/lib/finance";
+import { calculateMonthlyPayment, calculateAnnualFees } from "@/lib/finance";
 
 export interface ApartmentPlanInput {
   totalFloors: number;
@@ -6,6 +6,9 @@ export interface ApartmentPlanInput {
   pricePerSqm: number;
   downPaymentRatio: number;
   durationMonths: number;
+  serviceFeeRate?: number;
+  managementFeeRate?: number;
+  maintenanceFeeRate?: number;
 }
 
 export interface GeneratedApartment {
@@ -23,6 +26,9 @@ export interface GeneratedApartment {
   monthlyPayment: number;
   durationMonths: number;
   status: "AVAILABLE";
+  serviceFeeAnnual: number;
+  managementFeeAnnual: number;
+  maintenanceFeeAnnual: number;
 }
 
 const WING_LETTERS = ["A", "B", "C", "D"];
@@ -33,7 +39,7 @@ const VIEWS = ["City", "Garden", "Street", "Panoramic"];
  * builder — same shape used by the seed script, so admin-created and
  * seeded projects behave identically everywhere else in the app. */
 export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApartment[] {
-  const { totalFloors, unitsPerFloor, pricePerSqm, downPaymentRatio, durationMonths } = input;
+  const { totalFloors, unitsPerFloor, pricePerSqm, downPaymentRatio, durationMonths, serviceFeeRate, managementFeeRate, maintenanceFeeRate } = input;
   const wings = WING_LETTERS.slice(0, Math.max(1, Math.min(unitsPerFloor, WING_LETTERS.length)));
   const apartments: GeneratedApartment[] = [];
 
@@ -44,6 +50,7 @@ export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApart
       const price = Math.round(area * pricePerSqm);
       const downPayment = Math.round(price * downPaymentRatio);
       const { monthlyPaymentDisplay } = calculateMonthlyPayment({ totalPrice: price, downPayment, durationMonths });
+      const fees = calculateAnnualFees({ price, serviceFeeRate, managementFeeRate, maintenanceFeeRate });
 
       apartments.push({
         code: `${wing}${floor}01`,
@@ -60,6 +67,9 @@ export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApart
         monthlyPayment: monthlyPaymentDisplay,
         durationMonths,
         status: "AVAILABLE",
+        serviceFeeAnnual: fees.serviceFeeAnnual,
+        managementFeeAnnual: fees.managementFeeAnnual,
+        maintenanceFeeAnnual: fees.maintenanceFeeAnnual,
       });
     });
   }

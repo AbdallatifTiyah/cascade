@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/currency";
 import { calculateMonthlyPayment } from "@/lib/finance";
 import { ConfirmReservationButton } from "@/components/reservation/confirm-reservation-button";
+import { AnnualFeesCard } from "@/components/apartments/annual-fees-card";
 import { trackEvent } from "@/lib/audit";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n";
@@ -76,6 +77,15 @@ export default async function ReservationReviewPage({ searchParams }: { searchPa
           </div>
         </CardContent>
       </Card>
+
+      <AnnualFeesCard
+        fees={{
+          serviceFeeAnnual: apartment.serviceFeeAnnual,
+          managementFeeAnnual: apartment.managementFeeAnnual,
+          maintenanceFeeAnnual: apartment.maintenanceFeeAnnual,
+        }}
+        locale={locale}
+      />
 
       {alreadyJoined ? (
         <p className="rounded-xl border border-border bg-secondary p-4 text-sm text-muted-foreground">

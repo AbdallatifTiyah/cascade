@@ -438,6 +438,15 @@ const en: Dictionary = {
     showLess: "Show less",
     showFull: "Show full schedule ({n} more)",
   },
+  annualFees: {
+    title: "Annual ownership fees",
+    serviceFee: "Service fee",
+    managementFee: "Management fee",
+    maintenanceFee: "Maintenance fee",
+    total: "Total per year",
+    perYear: "/yr",
+    note: "Estimated recurring costs, billed annually once you take ownership. These are separate from your purchase price and payment plan.",
+  },
 };
 
 export default en;

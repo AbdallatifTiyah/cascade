@@ -15,6 +15,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const { ids } = await searchParams;
   const locale = getLocale();
   const t = getDictionary(locale).comparePage;
+  const tFees = getDictionary(locale).annualFees;
   const idList = (ids ?? "").split(",").filter(Boolean).slice(0, 3);
 
   const apartments = idList.length
@@ -49,6 +50,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
     { label: t.initialPayment, render: (a) => formatCurrency(a.downPayment) },
     { label: t.monthlyPayment, render: (a) => `${formatCurrency(a.monthlyPayment)}/mo` },
     { label: t.duration, render: (a) => `${a.durationMonths} ${locale === "ar" ? "شهراً" : "months"}` },
+    { label: tFees.serviceFee, render: (a) => `${formatCurrency(a.serviceFeeAnnual)}${tFees.perYear}` },
+    { label: tFees.managementFee, render: (a) => `${formatCurrency(a.managementFeeAnnual)}${tFees.perYear}` },
+    { label: tFees.maintenanceFee, render: (a) => `${formatCurrency(a.maintenanceFeeAnnual)}${tFees.perYear}` },
   ];
 
   return (

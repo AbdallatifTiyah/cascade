@@ -75,6 +75,46 @@ export function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+// Default annual rates for recurring ownership costs, expressed as a share
+// of the apartment price. Admins can override these per project.
+export const DEFAULT_SERVICE_FEE_RATE = 0.015;
+export const DEFAULT_MANAGEMENT_FEE_RATE = 0.01;
+export const DEFAULT_MAINTENANCE_FEE_RATE = 0.005;
+
+export interface AnnualFeesInput {
+  price: number;
+  serviceFeeRate?: number;
+  managementFeeRate?: number;
+  maintenanceFeeRate?: number;
+}
+
+export interface AnnualFeesResult {
+  serviceFeeAnnual: number;
+  managementFeeAnnual: number;
+  maintenanceFeeAnnual: number;
+  totalAnnual: number;
+}
+
+export function calculateAnnualFees(input: AnnualFeesInput): AnnualFeesResult {
+  const {
+    price,
+    serviceFeeRate = DEFAULT_SERVICE_FEE_RATE,
+    managementFeeRate = DEFAULT_MANAGEMENT_FEE_RATE,
+    maintenanceFeeRate = DEFAULT_MAINTENANCE_FEE_RATE,
+  } = input;
+
+  const serviceFeeAnnual = round2(price * serviceFeeRate);
+  const managementFeeAnnual = round2(price * managementFeeRate);
+  const maintenanceFeeAnnual = round2(price * maintenanceFeeRate);
+
+  return {
+    serviceFeeAnnual,
+    managementFeeAnnual,
+    maintenanceFeeAnnual,
+    totalAnnual: round2(serviceFeeAnnual + managementFeeAnnual + maintenanceFeeAnnual),
+  };
+}
+
 export function averageOfRange(min: number, max: number): number {
   return (min + max) / 2;
 }

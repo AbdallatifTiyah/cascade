@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { FinancialPlanCard } from "@/components/projects/financial-plan-card";
+import { AnnualFeesCard } from "@/components/apartments/annual-fees-card";
 import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 import { amenityLabel } from "@/lib/constants";
 import { trackEvent } from "@/lib/audit";
@@ -102,6 +103,15 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
 
         <div className="space-y-6">
           <FinancialPlanCard totalPrice={apartment.price} downPayment={apartment.downPayment} durationMonths={apartment.durationMonths} locale={locale} />
+
+          <AnnualFeesCard
+            fees={{
+              serviceFeeAnnual: apartment.serviceFeeAnnual,
+              managementFeeAnnual: apartment.managementFeeAnnual,
+              maintenanceFeeAnnual: apartment.maintenanceFeeAnnual,
+            }}
+            locale={locale}
+          />
 
           {isAvailable ? (
             <LinkButton href={ctaHref} size="lg" className="w-full">

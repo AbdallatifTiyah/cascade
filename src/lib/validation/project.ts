@@ -20,5 +20,8 @@ export const projectCreateSchema = z.object({
   pricePerSqm: z.number().positive(),
   downPaymentRatio: z.number().min(0.05).max(0.9),
   durationMonths: z.number().int().positive().max(240),
+  serviceFeeRate: z.number().min(0).max(0.2).default(0.015),
+  managementFeeRate: z.number().min(0).max(0.2).default(0.01),
+  maintenanceFeeRate: z.number().min(0).max(0.2).default(0.005),
 });
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>;

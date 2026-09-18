@@ -35,6 +35,9 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
     pricePerSqm: 300,
     downPaymentRatio: 0.2,
     durationMonths: 84,
+    serviceFeeRate: 1.5,
+    managementFeeRate: 1,
+    maintenanceFeeRate: 0.5,
   });
 
   function toggleAmenity(key: string) {
@@ -49,7 +52,12 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
       const res = await fetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          serviceFeeRate: form.serviceFeeRate / 100,
+          managementFeeRate: form.managementFeeRate / 100,
+          maintenanceFeeRate: form.maintenanceFeeRate / 100,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -153,6 +161,29 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
           <div className="space-y-1.5">
             <Label>Down payment ratio</Label>
             <Input type="number" min={0.05} max={0.9} step={0.05} value={form.downPaymentRatio} onChange={(e) => setForm({ ...form, downPaymentRatio: Number(e.target.value) })} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Annual ownership fees</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <p className="text-xs text-muted-foreground sm:col-span-3">
+            Recurring yearly costs shown to buyers alongside the purchase price, as a percentage of the apartment price.
+          </p>
+          <div className="space-y-1.5">
+            <Label>Service fee (% / year)</Label>
+            <Input type="number" min={0} max={20} step={0.1} value={form.serviceFeeRate} onChange={(e) => setForm({ ...form, serviceFeeRate: Number(e.target.value) })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Management fee (% / year)</Label>
+            <Input type="number" min={0} max={20} step={0.1} value={form.managementFeeRate} onChange={(e) => setForm({ ...form, managementFeeRate: Number(e.target.value) })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Maintenance fee (% / year)</Label>
+            <Input type="number" min={0} max={20} step={0.1} value={form.maintenanceFeeRate} onChange={(e) => setForm({ ...form, maintenanceFeeRate: Number(e.target.value) })} />
           </div>
         </CardContent>
       </Card>

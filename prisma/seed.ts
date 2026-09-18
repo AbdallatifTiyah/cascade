@@ -7,7 +7,7 @@ import {
   CONSTRUCTION_STAGE_TEMPLATE,
   LEAD_STATUSES,
 } from "../src/lib/constants";
-import { calculateMonthlyPayment, buildPaymentSchedule } from "../src/lib/finance";
+import { calculateMonthlyPayment, calculateAnnualFees, buildPaymentSchedule } from "../src/lib/finance";
 import { DEFAULT_WEIGHTS } from "../src/lib/matching/weights";
 
 const db = new PrismaClient();
@@ -321,6 +321,7 @@ async function main() {
         const downPayment = Math.round(price * 0.2);
         const durationMonths = pick([60, 72, 84, 96]);
         const { monthlyPaymentDisplay } = calculateMonthlyPayment({ totalPrice: price, downPayment, durationMonths });
+        const fees = calculateAnnualFees({ price });
 
         await db.apartment.create({
           data: {
@@ -339,6 +340,9 @@ async function main() {
             monthlyPayment: monthlyPaymentDisplay,
             durationMonths,
             status: "AVAILABLE",
+            serviceFeeAnnual: fees.serviceFeeAnnual,
+            managementFeeAnnual: fees.managementFeeAnnual,
+            maintenanceFeeAnnual: fees.maintenanceFeeAnnual,
           },
         });
       }

@@ -32,6 +32,9 @@ export async function POST(request: Request) {
     pricePerSqm: data.pricePerSqm,
     downPaymentRatio: data.downPaymentRatio,
     durationMonths: data.durationMonths,
+    serviceFeeRate: data.serviceFeeRate,
+    managementFeeRate: data.managementFeeRate,
+    maintenanceFeeRate: data.maintenanceFeeRate,
   });
 
   const project = await db.project.create({

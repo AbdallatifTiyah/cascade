@@ -379,4 +379,13 @@ export interface Dictionary {
     showLess: string;
     showFull: string;
   };
+  annualFees: {
+    title: string;
+    serviceFee: string;
+    managementFee: string;
+    maintenanceFee: string;
+    total: string;
+    perYear: string;
+    note: string;
+  };
 }

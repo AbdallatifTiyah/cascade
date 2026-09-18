@@ -219,6 +219,12 @@ model Apartment {
   status          String   @default("AVAILABLE")
   // AVAILABLE | RESERVED | ALLOCATED | UNAVAILABLE | COMPLETED
 
+  // Recurring annual ownership costs, shown alongside the purchase price
+  // (mirrors the fee breakdown investors expect from apps like Stake).
+  serviceFeeAnnual     Float @default(0)
+  managementFeeAnnual  Float @default(0)
+  maintenanceFeeAnnual Float @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

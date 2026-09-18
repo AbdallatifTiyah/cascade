@@ -445,6 +445,15 @@ const ar: Dictionary = {
     showLess: "عرض أقل",
     showFull: "عرض الجدول كاملاً ({n} إضافي)",
   },
+  annualFees: {
+    title: "الرسوم السنوية للملكية",
+    serviceFee: "رسوم الخدمات",
+    managementFee: "رسوم الإدارة",
+    maintenanceFee: "رسوم الصيانة",
+    total: "الإجمالي سنوياً",
+    perYear: "/سنوياً",
+    note: "تكاليف تقديرية متكررة، تُحتسب سنوياً بعد استلام الملكية. هذه الرسوم منفصلة عن سعر الشراء وخطة الدفعات.",
+  },
 };
 
 export default ar;
