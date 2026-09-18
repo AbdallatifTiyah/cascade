@@ -287,6 +287,19 @@ export interface Dictionary {
     buildPlan: string;
     allProjectsTitle: string;
   };
+  projectFilters: {
+    locationLabel: string;
+    allLocations: string;
+    bedroomsLabel: string;
+    anyBedrooms: string;
+    maxMonthlyLabel: string;
+    maxMonthlyPlaceholder: string;
+    apply: string;
+    clear: string;
+    noResultsTitle: string;
+    noResultsDesc: string;
+    resultsCount: string;
+  };
   projectDetailPage: {
     overviewTitle: string;
     landSize: string;

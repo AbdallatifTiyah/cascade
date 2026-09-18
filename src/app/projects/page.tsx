@@ -5,38 +5,71 @@ import { db } from "@/lib/db";
 import { getRecommendedProjects } from "@/lib/matching/service";
 import { summarizeProject } from "@/lib/projects/summary";
 import { ProjectCard } from "@/components/projects/project-card";
+import { ProjectFilterBar } from "@/components/projects/project-filter-bar";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2 } from "lucide-react";
+import { Building2, SearchX } from "lucide-react";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n";
+import { matchesProjectFilters, parseProjectFilters, hasActiveFilters } from "@/lib/projects/filters";
 
 export const metadata: Metadata = { title: "Explore Projects" };
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   const locale = getLocale();
   const t = getDictionary(locale).projectsListPage;
+  const tf = getDictionary(locale).projectFilters;
 
-  const participantCounts = await db.projectParticipant.groupBy({ by: ["projectId"], _count: { projectId: true } });
+  const filters = parseProjectFilters(await searchParams);
+  const filtersActive = hasActiveFilters(filters);
+
+  const [participantCounts, locations] = await Promise.all([
+    db.projectParticipant.groupBy({ by: ["projectId"], _count: { projectId: true } }),
+    db.location.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+  ]);
   const countByProject = Object.fromEntries(participantCounts.map((p) => [p.projectId, p._count.projectId]));
+
+  const filterBar = (
+    <ProjectFilterBar locations={locations.map((l) => ({ id: l.id, name: l.name }))} filters={filters} hasActive={filtersActive} locale={locale} />
+  );
 
   if (session?.user?.id) {
     const preference = await db.propertyPreference.findUnique({ where: { userId: session.user.id } });
 
     if (preference) {
       const recommendations = await getRecommendedProjects(session.user.id);
+      const filtered = recommendations.filter(({ project }) => matchesProjectFilters(project, filters));
+
       return (
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.matchedTitle}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{t.matchedSubtitle}</p>
           </div>
+
+          {filterBar}
+
           {recommendations.length === 0 ? (
             <EmptyState icon={Building2} title={t.emptyTitle} description={t.emptyDesc} />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title={tf.noResultsTitle}
+              description={tf.noResultsDesc}
+              action={
+                <LinkButton href="/projects" size="sm">
+                  {tf.clear}
+                </LinkButton>
+              }
+            />
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {recommendations.map(({ project, match }) => (
+              {filtered.map(({ project, match }) => (
                 <ProjectCard
                   key={project.id}
                   id={project.id}
@@ -58,11 +91,12 @@ export default async function ProjectsPage() {
     }
   }
 
-  const projects = await db.project.findMany({
+  const allProjects = await db.project.findMany({
     where: { status: { not: "DRAFT" } },
     include: { location: true, apartments: true },
     orderBy: { createdAt: "desc" },
   });
+  const filteredProjects = allProjects.filter((project) => matchesProjectFilters(project, filters));
 
   return (
     <div className="space-y-6">
@@ -81,22 +115,37 @@ export default async function ProjectsPage() {
 
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.allProjectsTitle}</h1>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            id={project.id}
-            slug={project.slug}
-            name={project.name}
-            locationName={project.location.name}
-            coverTheme={project.coverTheme}
-            status={project.status}
-            participantCount={countByProject[project.id] ?? 0}
-            summary={summarizeProject(project.apartments, project.estimatedDeliveryDate)}
-            locale={locale}
-          />
-        ))}
-      </div>
+      {filterBar}
+
+      {filteredProjects.length === 0 ? (
+        <EmptyState
+          icon={SearchX}
+          title={tf.noResultsTitle}
+          description={tf.noResultsDesc}
+          action={
+            <LinkButton href="/projects" size="sm">
+              {tf.clear}
+            </LinkButton>
+          }
+        />
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              slug={project.slug}
+              name={project.name}
+              locationName={project.location.name}
+              coverTheme={project.coverTheme}
+              status={project.status}
+              participantCount={countByProject[project.id] ?? 0}
+              summary={summarizeProject(project.apartments, project.estimatedDeliveryDate)}
+              locale={locale}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
