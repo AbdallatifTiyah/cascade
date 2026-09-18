@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getDictionary, type Locale } from "@/lib/i18n";
 
 function tone(score: number) {
   if (score >= 85) return "text-success bg-success/10";
@@ -6,7 +7,8 @@ function tone(score: number) {
   return "text-muted-foreground bg-muted";
 }
 
-export function MatchBadge({ score, className }: { score: number; className?: string }) {
+export function MatchBadge({ score, className, locale = "en" }: { score: number; className?: string; locale?: Locale }) {
+  const t = getDictionary(locale);
   return (
     <span
       className={cn(
@@ -15,7 +17,7 @@ export function MatchBadge({ score, className }: { score: number; className?: st
         className
       )}
     >
-      {Math.round(score)}% Match
+      {Math.round(score)}{t.matchBadge.matchSuffix}
     </span>
   );
 }

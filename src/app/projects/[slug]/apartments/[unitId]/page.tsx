@@ -11,6 +11,9 @@ import { FinancialPlanCard } from "@/components/projects/financial-plan-card";
 import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 import { amenityLabel } from "@/lib/constants";
 import { trackEvent } from "@/lib/audit";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
+import { localizedAmenity, localizedApartmentStatus } from "@/lib/i18n/labels";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; unitId: string }> }): Promise<Metadata> {
   const { unitId } = await params;
@@ -27,22 +30,25 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
   if (!apartment || apartment.project.slug !== slug) notFound();
 
   const session = await auth();
+  const locale = getLocale();
+  const t = getDictionary(locale).apartmentDetailPage;
   await trackEvent({ userId: session?.user?.id, name: "apartment_viewed", metadata: { apartmentId: apartment.id } });
   const features: string[] = JSON.parse(apartment.features || "[]");
   const style = APARTMENT_STATUS_STYLE[apartment.status] ?? APARTMENT_STATUS_STYLE.UNAVAILABLE;
+  const statusLabel = localizedApartmentStatus(apartment.status, locale, style.label);
   const isAvailable = apartment.status === "AVAILABLE";
 
   const reserveHref = `/reservation?apartmentId=${apartment.id}`;
   const ctaHref = session?.user ? reserveHref : `/login?callbackUrl=${encodeURIComponent(reserveHref)}`;
 
   const specs = [
-    { icon: Layers, label: "Floor", value: `${apartment.floor}` },
-    { icon: Ruler, label: "Area", value: `${apartment.area} m²` },
-    { icon: BedDouble, label: "Bedrooms", value: `${apartment.bedrooms}` },
-    { icon: Bath, label: "Bathrooms", value: `${apartment.bathrooms}` },
-    { icon: Building2, label: "Balcony", value: apartment.hasBalcony ? "Yes" : "No" },
-    { icon: Eye, label: "View", value: apartment.view },
-    { icon: Car, label: "Parking", value: apartment.parkingIncluded ? "Included" : "Not included" },
+    { icon: Layers, label: t.floor, value: `${apartment.floor}` },
+    { icon: Ruler, label: t.area, value: `${apartment.area} m²` },
+    { icon: BedDouble, label: t.bedrooms, value: `${apartment.bedrooms}` },
+    { icon: Bath, label: t.bathrooms, value: `${apartment.bathrooms}` },
+    { icon: Building2, label: t.balcony, value: apartment.hasBalcony ? t.yes : t.no },
+    { icon: Eye, label: t.view, value: apartment.view },
+    { icon: Car, label: t.parking, value: apartment.parkingIncluded ? t.included : t.notIncluded },
   ];
 
   return (
@@ -52,9 +58,9 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
           {apartment.project.name} · {apartment.project.location.name}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Apartment {apartment.code}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.titlePrefix} {apartment.code}</h1>
           <Badge className={style.className} variant="outline">
-            {style.label}
+            {statusLabel}
           </Badge>
         </div>
       </div>
@@ -65,7 +71,7 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Apartment details</CardTitle>
+              <CardTitle>{locale === "ar" ? "تفاصيل الشقة" : "Apartment details"}</CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-2 gap-5 sm:grid-cols-4">
@@ -79,13 +85,13 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
                 ))}
               </dl>
               <div className="mt-6 border-t border-border pt-5">
-                <p className="mb-2 text-sm font-medium">Included</p>
+                <p className="mb-2 text-sm font-medium">{t.includedTitle}</p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Open-plan living &amp; dining</Badge>
-                  <Badge variant="outline">Fully fitted kitchen</Badge>
+                  <Badge variant="outline">{t.openPlan}</Badge>
+                  <Badge variant="outline">{t.fittedKitchen}</Badge>
                   {features.map((f) => (
                     <Badge key={f} variant="outline">
-                      {amenityLabel(f)}
+                      {localizedAmenity(f, locale, amenityLabel(f))}
                     </Badge>
                   ))}
                 </div>
@@ -95,15 +101,15 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
         </div>
 
         <div className="space-y-6">
-          <FinancialPlanCard totalPrice={apartment.price} downPayment={apartment.downPayment} durationMonths={apartment.durationMonths} />
+          <FinancialPlanCard totalPrice={apartment.price} downPayment={apartment.downPayment} durationMonths={apartment.durationMonths} locale={locale} />
 
           {isAvailable ? (
             <LinkButton href={ctaHref} size="lg" className="w-full">
-              Reserve This Apartment
+              {t.reserveButton}
             </LinkButton>
           ) : (
             <div className="rounded-xl border border-border bg-secondary p-4 text-center text-sm text-muted-foreground">
-              This apartment is {style.label.toLowerCase()} and can't be reserved right now.
+              {t.notAvailable}
             </div>
           )}
         </div>

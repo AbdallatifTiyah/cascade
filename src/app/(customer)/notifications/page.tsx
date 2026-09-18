@@ -7,6 +7,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { MarkAllReadButton } from "@/components/notifications/mark-all-read-button";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Notifications" };
 
@@ -21,17 +23,19 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default async function NotificationsPage() {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).notificationsPage;
   const notifications = await db.notification.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Notifications</h1>
-        <MarkAllReadButton disabled={notifications.every((n) => n.isRead)} />
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
+        <MarkAllReadButton disabled={notifications.every((n) => n.isRead)} locale={locale} />
       </div>
 
       {notifications.length === 0 ? (
-        <EmptyState icon={Bell} title="No notifications yet" description="Updates about your reservation, payments, and construction will show up here." />
+        <EmptyState icon={Bell} title={t.emptyTitle} description={t.emptyDesc} />
       ) : (
         <div className="space-y-3">
           {notifications.map((n) => {

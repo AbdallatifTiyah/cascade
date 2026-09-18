@@ -12,11 +12,16 @@ import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/utils";
 import { PROJECT_STATUS_LABEL } from "@/lib/constants";
 import { Building2 } from "lucide-react";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
+import { localizedProjectStatus } from "@/lib/i18n/labels";
 
 export const metadata: Metadata = { title: "My Project" };
 
 export default async function MyProjectPage() {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).myProject;
 
   const reservations = await db.reservation.findMany({
     where: { userId: user.id, status: "CONFIRMED" },
@@ -32,11 +37,11 @@ export default async function MyProjectPage() {
     return (
       <EmptyState
         icon={Building2}
-        title="You haven't joined a project yet"
-        description="Once you reserve an apartment, you'll be able to track construction and payments here."
+        title={t.emptyTitle}
+        description={t.emptyDesc}
         action={
           <LinkButton href="/projects" size="sm">
-            Explore projects
+            {t.exploreProjects}
           </LinkButton>
         }
       />
@@ -45,7 +50,7 @@ export default async function MyProjectPage() {
 
   return (
     <div className="space-y-10">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">My Project</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
 
       {reservations.map((reservation) => {
         const stages = reservation.project.constructionStages;
@@ -65,23 +70,23 @@ export default async function MyProjectPage() {
                 <div>
                   <CardTitle>{reservation.project.name}</CardTitle>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" /> {reservation.project.location.name} · Apartment {reservation.apartment.code}
+                    <MapPin className="h-3.5 w-3.5" /> {reservation.project.location.name} · {locale === "ar" ? "شقة" : "Apartment"} {reservation.apartment.code}
                   </p>
                 </div>
-                <Badge variant="success">{PROJECT_STATUS_LABEL[reservation.project.status]}</Badge>
+                <Badge variant="success">{localizedProjectStatus(reservation.project.status, locale, PROJECT_STATUS_LABEL[reservation.project.status])}</Badge>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">Construction progress</span>
+                      <span className="font-medium">{t.constructionProgress}</span>
                       <span className="font-tabular text-muted-foreground">{Math.round(constructionProgress)}%</span>
                     </div>
                     <Progress value={constructionProgress} className="mt-2" />
                   </div>
                   <div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">Payment progress</span>
+                      <span className="font-medium">{t.paymentProgress}</span>
                       <span className="font-tabular text-muted-foreground">{Math.round(paymentProgress)}%</span>
                     </div>
                     <Progress value={paymentProgress} className="mt-2" indicatorClassName="bg-accent" />
@@ -91,8 +96,8 @@ export default async function MyProjectPage() {
                 {nextPayment && (
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/50 p-4">
                     <div>
-                      <p className="text-sm font-medium">Next payment</p>
-                      <p className="text-xs text-muted-foreground">Due {formatDate(nextPayment.dueDate)}</p>
+                      <p className="text-sm font-medium">{t.nextPayment}</p>
+                      <p className="text-xs text-muted-foreground">{t.due} {formatDate(nextPayment.dueDate)}</p>
                     </div>
                     <p className="font-tabular text-lg font-semibold">{formatCurrency(nextPayment.amount)}</p>
                   </div>
@@ -100,7 +105,7 @@ export default async function MyProjectPage() {
 
                 <div className="mt-4 flex gap-3">
                   <LinkButton href="/payments" variant="outline" size="sm">
-                    View payment plan
+                    {t.viewPaymentPlan}
                   </LinkButton>
                 </div>
               </CardContent>
@@ -109,21 +114,21 @@ export default async function MyProjectPage() {
             <div className="grid gap-6 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Construction timeline</CardTitle>
+                  <CardTitle>{t.constructionTimeline}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ConstructionTimeline stages={stages} />
+                  <ConstructionTimeline stages={stages} locale={locale} />
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex-row items-center gap-2 space-y-0">
                   <Megaphone className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle>Project announcements</CardTitle>
+                  <CardTitle>{t.announcements}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {reservation.project.updates.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No announcements yet.</p>
+                    <p className="text-sm text-muted-foreground">{t.noAnnouncements}</p>
                   ) : (
                     <div className="space-y-4">
                       {reservation.project.updates.map((update) => (

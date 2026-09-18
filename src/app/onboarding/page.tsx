@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { OnboardingWizard, type OnboardingDraft } from "@/components/onboarding/onboarding-wizard";
+import { getLocale } from "@/lib/i18n/get-locale";
 
 export const metadata: Metadata = { title: "Build My Property Plan" };
 
 export default async function OnboardingPage() {
   const user = await requireUser();
+  const locale = getLocale();
 
   const [locations, preference] = await Promise.all([
     db.location.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
@@ -38,6 +40,7 @@ export default async function OnboardingPage() {
         locations={locations.map((l) => ({ id: l.id, name: l.name, region: l.region }))}
         initialDraft={initialDraft}
         mode={preference ? "edit" : "create"}
+        locale={locale}
       />
     </div>
   );

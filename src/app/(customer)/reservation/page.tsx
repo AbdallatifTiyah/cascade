@@ -9,11 +9,17 @@ import { formatCurrency } from "@/lib/currency";
 import { calculateMonthlyPayment } from "@/lib/finance";
 import { ConfirmReservationButton } from "@/components/reservation/confirm-reservation-button";
 import { trackEvent } from "@/lib/audit";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
+import { localizedApartmentStatus } from "@/lib/i18n/labels";
+import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 
 export const metadata: Metadata = { title: "Confirm Reservation" };
 
 export default async function ReservationReviewPage({ searchParams }: { searchParams: Promise<{ apartmentId?: string }> }) {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).reservationReview;
   const { apartmentId } = await searchParams;
   if (!apartmentId) redirect("/projects");
 
@@ -38,8 +44,8 @@ export default async function ReservationReviewPage({ searchParams }: { searchPa
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Confirm your reservation</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Review the details below before reserving this apartment.</p>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
       <Card>
@@ -51,42 +57,43 @@ export default async function ReservationReviewPage({ searchParams }: { searchPa
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between border-t border-border pt-4">
-            <span className="text-sm text-muted-foreground">Apartment</span>
+            <span className="text-sm text-muted-foreground">{t.apartment}</span>
             <span className="font-tabular font-semibold">
-              {apartment.code} · {apartment.area} m² · {apartment.bedrooms} bed
+              {apartment.code} · {apartment.area} m² · {apartment.bedrooms} {locale === "ar" ? "غرف" : "bed"}
             </span>
           </div>
-          <Row label="Initial payment" value={formatCurrency(plan.downPayment)} />
-          <Row label="Monthly payment" value={`${formatCurrency(plan.monthlyPaymentDisplay, true)}/mo`} />
-          <Row label="Duration" value={`${apartment.durationMonths} months`} />
+          <Row label={t.initialPayment} value={formatCurrency(plan.downPayment)} />
+          <Row label={t.monthlyPayment} value={`${formatCurrency(plan.monthlyPaymentDisplay, true)}/mo`} />
+          <Row label={t.duration} value={`${apartment.durationMonths} ${t.monthsSuffix}`} />
           <div className="border-t border-border pt-4">
-            <Row label="Estimated total" value={formatCurrency(plan.totalPrice)} emphasize />
+            <Row label={t.estimatedTotal} value={formatCurrency(plan.totalPrice)} emphasize />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Status</span>
-            <Badge variant={apartment.status === "AVAILABLE" ? "success" : "destructive"}>{apartment.status}</Badge>
+            <span className="text-sm text-muted-foreground">{t.status}</span>
+            <Badge variant={apartment.status === "AVAILABLE" ? "success" : "destructive"}>
+              {localizedApartmentStatus(apartment.status, locale, APARTMENT_STATUS_STYLE[apartment.status]?.label ?? apartment.status)}
+            </Badge>
           </div>
         </CardContent>
       </Card>
 
       {alreadyJoined ? (
         <p className="rounded-xl border border-border bg-secondary p-4 text-sm text-muted-foreground">
-          You've already joined this project. View your progress in{" "}
+          {t.alreadyJoined}{" "}
           <a href="/my-project" className="font-medium text-foreground underline underline-offset-4">
-            My Project
+            {locale === "ar" ? "مشروعي" : "My Project"}
           </a>
-          .
         </p>
       ) : apartment.status !== "AVAILABLE" ? (
         <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          This apartment is no longer available. Please choose a different unit.
+          {t.unavailable}
         </p>
       ) : (
-        <ConfirmReservationButton apartmentId={apartment.id} />
+        <ConfirmReservationButton apartmentId={apartment.id} locale={locale} />
       )}
 
       <p className="text-center text-xs text-muted-foreground">
-        Pricing shown reflects current project figures and becomes your confirmed plan upon reservation.
+        {t.disclaimer}
       </p>
     </div>
   );

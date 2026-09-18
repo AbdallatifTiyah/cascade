@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { bedroomLabel, timelineLabel, PROPERTY_TYPES } from "@/lib/constants";
+import { getDictionary, type Locale } from "@/lib/i18n";
+import { localizedPropertyType, localizedBedroom, localizedTimeline } from "@/lib/i18n/labels";
 
 export interface PropertyProfileData {
   locationNames: string[];
@@ -19,27 +21,28 @@ export interface PropertyProfileData {
   timeline: string;
 }
 
-export function PropertyProfileCard({ profile, compact }: { profile: PropertyProfileData; compact?: boolean }) {
+export function PropertyProfileCard({ profile, compact, locale = "en" }: { profile: PropertyProfileData; compact?: boolean; locale?: Locale }) {
+  const t = getDictionary(locale).propertyProfileCard;
   const propertyTypeLabel = PROPERTY_TYPES.find((p) => p.value === profile.propertyType)?.label ?? profile.propertyType;
 
   const fields = [
-    { label: "Location", value: profile.locationNames.join(", ") },
-    { label: "Property", value: propertyTypeLabel },
-    { label: "Bedrooms", value: bedroomLabel(profile.bedrooms) },
-    { label: "Size", value: `${Math.round(profile.minSize)}–${Math.round(profile.maxSize)} m²` },
-    { label: "Down payment", value: `${formatCurrency(profile.downPaymentMin)}–${formatCurrency(profile.downPaymentMax)}` },
-    { label: "Monthly budget", value: `${formatCurrency(profile.monthlyMin)}–${formatCurrency(profile.monthlyMax)}` },
-    { label: "Duration", value: `${profile.durationMinYears}–${profile.durationMaxYears} years` },
-    { label: "Timeline", value: timelineLabel(profile.timeline) },
+    { label: t.location, value: profile.locationNames.join(", ") },
+    { label: t.property, value: localizedPropertyType(profile.propertyType, locale, propertyTypeLabel) },
+    { label: t.bedrooms, value: localizedBedroom(profile.bedrooms, locale, bedroomLabel(profile.bedrooms)) },
+    { label: t.size, value: `${Math.round(profile.minSize)}–${Math.round(profile.maxSize)} m²` },
+    { label: t.downPayment, value: `${formatCurrency(profile.downPaymentMin)}–${formatCurrency(profile.downPaymentMax)}` },
+    { label: t.monthlyBudget, value: `${formatCurrency(profile.monthlyMin)}–${formatCurrency(profile.monthlyMax)}` },
+    { label: t.duration, value: `${profile.durationMinYears}–${profile.durationMaxYears} ${locale === "ar" ? "سنوات" : "years"}` },
+    { label: t.timeline, value: localizedTimeline(profile.timeline, locale, timelineLabel(profile.timeline)) },
   ];
 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle>Your Property Profile</CardTitle>
+        <CardTitle>{t.title}</CardTitle>
         <LinkButton href="/onboarding" variant="outline" size="sm">
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t.edit}
         </LinkButton>
       </CardHeader>
       <CardContent>

@@ -6,11 +6,15 @@ import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Reservation Confirmed" };
 
 export default async function ReservationConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).reservationConfirmed;
   const { id } = await params;
 
   const reservation = await db.reservation.findUnique({
@@ -27,32 +31,32 @@ export default async function ReservationConfirmationPage({ params }: { params: 
         </div>
       </div>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Reservation confirmed</h1>
-        <p className="mt-1 text-muted-foreground">Welcome to {reservation.project.name}.</p>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
+        <p className="mt-1 text-muted-foreground">{t.welcomeTo} {reservation.project.name}.</p>
       </div>
 
       <Card>
         <CardContent className="space-y-3 p-6 text-left">
-          <Row label="Reservation ID" value={reservation.code} />
-          <Row label="Project" value={`${reservation.project.name} · ${reservation.project.location.name}`} />
-          <Row label="Apartment" value={`${reservation.apartment.code} · ${reservation.apartment.area} m²`} />
-          <Row label="Reservation date" value={formatDate(reservation.createdAt)} />
+          <Row label={t.reservationId} value={reservation.code} />
+          <Row label={t.project} value={`${reservation.project.name} · ${reservation.project.location.name}`} />
+          <Row label={t.apartment} value={`${reservation.apartment.code} · ${reservation.apartment.area} m²`} />
+          <Row label={t.reservationDate} value={formatDate(reservation.createdAt)} />
         </CardContent>
       </Card>
 
       <Card className="bg-secondary/50 text-left">
         <CardContent className="space-y-2 p-6">
-          <p className="text-sm font-semibold">Next steps</p>
+          <p className="text-sm font-semibold">{t.nextSteps}</p>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li>· Your payment plan has been created — review it under Payments.</li>
-            <li>· Track construction progress any time from My Project.</li>
-            <li>· We'll notify you as the project reaches each milestone.</li>
+            <li>· {t.step1}</li>
+            <li>· {t.step2}</li>
+            <li>· {t.step3}</li>
           </ul>
         </CardContent>
       </Card>
 
       <LinkButton href="/my-project" size="lg" className="w-full">
-        View My Project
+        {t.viewMyProject}
       </LinkButton>
     </div>
   );

@@ -10,11 +10,15 @@ import { ProjectCard } from "@/components/projects/project-card";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Building2 } from "lucide-react";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Your Property Profile" };
 
 export default async function ProfileHomePage() {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale);
 
   const preference = await db.propertyPreference.findUnique({
     where: { userId: user.id },
@@ -35,11 +39,12 @@ export default async function ProfileHomePage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm text-muted-foreground">Welcome back,</p>
+        <p className="text-sm text-muted-foreground">{t.profileHome.welcomeBack}</p>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{user.firstName} {user.lastName}</h1>
       </div>
 
       <PropertyProfileCard
+        locale={locale}
         profile={{
           locationNames: preference.locations.map((l) => l.location.name),
           propertyType: preference.propertyType,
@@ -58,9 +63,9 @@ export default async function ProfileHomePage() {
 
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">Recommended for you</h2>
+          <h2 className="text-xl font-semibold tracking-tight">{t.profileHome.recommendedForYou}</h2>
           <LinkButton href="/projects" variant="ghost" size="sm">
-            Find My Projects
+            {t.profileHome.findMyProjects}
             <ArrowRight className="h-4 w-4" />
           </LinkButton>
         </div>
@@ -68,11 +73,11 @@ export default async function ProfileHomePage() {
         {top.length === 0 ? (
           <EmptyState
             icon={Building2}
-            title="No matching projects yet"
-            description="We're still lining up projects for your area and budget. Check back soon, or explore everything Cascade currently offers."
+            title={t.profileHome.noMatchingTitle}
+            description={t.profileHome.noMatchingDesc}
             action={
               <LinkButton href="/projects" size="sm">
-                Explore all projects
+                {t.profileHome.exploreAllProjects}
               </LinkButton>
             }
             className="mt-4"
@@ -91,6 +96,7 @@ export default async function ProfileHomePage() {
                 participantCount={countByProject[project.id] ?? 0}
                 summary={summarizeProject(project.apartments, project.estimatedDeliveryDate)}
                 matchScore={match.overallScore}
+                locale={locale}
               />
             ))}
           </div>

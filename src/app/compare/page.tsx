@@ -6,11 +6,15 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { Scale } from "lucide-react";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Compare Apartments" };
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ ids?: string }> }) {
   const { ids } = await searchParams;
+  const locale = getLocale();
+  const t = getDictionary(locale).comparePage;
   const idList = (ids ?? "").split(",").filter(Boolean).slice(0, 3);
 
   const apartments = idList.length
@@ -21,11 +25,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
     return (
       <EmptyState
         icon={Scale}
-        title="Nothing to compare yet"
-        description="Select up to 3 apartments from a project's apartment list to compare them side by side."
+        title={t.emptyTitle}
+        description={t.emptyDesc}
         action={
           <LinkButton href="/projects" size="sm">
-            Explore projects
+            {t.exploreProjects}
           </LinkButton>
         }
       />
@@ -33,27 +37,27 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   }
 
   const rows: { label: string; render: (a: (typeof apartments)[number]) => React.ReactNode }[] = [
-    { label: "Project", render: (a) => a.project.name },
-    { label: "Area", render: (a) => `${a.area} m²` },
-    { label: "Floor", render: (a) => a.floor },
-    { label: "Bedrooms", render: (a) => a.bedrooms },
-    { label: "Bathrooms", render: (a) => a.bathrooms },
-    { label: "View", render: (a) => a.view },
-    { label: "Balcony", render: (a) => (a.hasBalcony ? "Yes" : "No") },
-    { label: "Parking", render: (a) => (a.parkingIncluded ? "Included" : "Not included") },
-    { label: "Price", render: (a) => formatCurrency(a.price) },
-    { label: "Initial payment", render: (a) => formatCurrency(a.downPayment) },
-    { label: "Monthly payment", render: (a) => `${formatCurrency(a.monthlyPayment)}/mo` },
-    { label: "Duration", render: (a) => `${a.durationMonths} months` },
+    { label: t.project, render: (a) => a.project.name },
+    { label: t.area, render: (a) => `${a.area} m²` },
+    { label: t.floor, render: (a) => a.floor },
+    { label: t.bedrooms, render: (a) => a.bedrooms },
+    { label: t.bathrooms, render: (a) => a.bathrooms },
+    { label: t.view, render: (a) => a.view },
+    { label: t.balcony, render: (a) => (a.hasBalcony ? t.yes : t.no) },
+    { label: t.parking, render: (a) => (a.parkingIncluded ? t.included : t.notIncluded) },
+    { label: t.price, render: (a) => formatCurrency(a.price) },
+    { label: t.initialPayment, render: (a) => formatCurrency(a.downPayment) },
+    { label: t.monthlyPayment, render: (a) => `${formatCurrency(a.monthlyPayment)}/mo` },
+    { label: t.duration, render: (a) => `${a.durationMonths} ${locale === "ar" ? "شهراً" : "months"}` },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Compare apartments</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Spec</TableHead>
+            <TableHead>{t.spec}</TableHead>
             {apartments.map((a) => (
               <TableHead key={a.id}>
                 <Link href={`/projects/${a.project.slug}/apartments/${a.id}`} className="font-tabular text-sm font-semibold text-foreground hover:underline">

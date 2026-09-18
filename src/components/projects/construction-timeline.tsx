@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
+import { getDictionary, type Locale } from "@/lib/i18n";
 
 export interface ConstructionStageItem {
   id: string;
@@ -11,7 +12,8 @@ export interface ConstructionStageItem {
   description: string | null;
 }
 
-export function ConstructionTimeline({ stages }: { stages: ConstructionStageItem[] }) {
+export function ConstructionTimeline({ stages, locale = "en" }: { stages: ConstructionStageItem[]; locale?: Locale }) {
+  const t = getDictionary(locale).constructionTimeline;
   return (
     <ol className="space-y-0">
       {stages.map((stage, i) => {
@@ -33,7 +35,7 @@ export function ConstructionTimeline({ stages }: { stages: ConstructionStageItem
                 <p className={cn("font-medium", !done && !current && "text-muted-foreground")}>{stage.name}</p>
                 {(stage.actualDate || stage.plannedDate) && (
                   <span className="text-xs text-muted-foreground">
-                    {done ? "Completed " : current ? "Started " : "Planned "}
+                    {done ? t.completedPrefix : current ? t.startedPrefix : t.plannedPrefix}
                     {formatDate((stage.actualDate ?? stage.plannedDate)!)}
                   </span>
                 )}

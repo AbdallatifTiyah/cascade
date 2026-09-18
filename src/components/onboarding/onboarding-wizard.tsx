@@ -13,6 +13,8 @@ import {
   PROPERTY_TYPES,
   TIMELINE_OPTIONS,
 } from "@/lib/constants";
+import { getDictionary, type Locale } from "@/lib/i18n";
+import { localizedPropertyType, localizedBedroom, localizedTimeline, localizedAmenity } from "@/lib/i18n/labels";
 
 export interface OnboardingDraft {
   locationIds: string[];
@@ -59,12 +61,15 @@ export function OnboardingWizard({
   locations,
   initialDraft,
   mode = "create",
+  locale = "en",
 }: {
   locations: { id: string; name: string; region: string | null }[];
   initialDraft?: OnboardingDraft;
   mode?: "create" | "edit";
+  locale?: Locale;
 }) {
   const router = useRouter();
+  const t = getDictionary(locale).onboarding;
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<OnboardingDraft>(initialDraft ?? DEFAULT_DRAFT);
   const [loading, setLoading] = useState(false);
@@ -130,37 +135,37 @@ export function OnboardingWizard({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please review your answers.");
+        setError(data.error ?? t.errorGeneric);
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
       router.push("/profile");
       router.refresh();
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.errorNetwork);
     } finally {
       setLoading(false);
     }
   }
 
   const titles: Record<number, string> = {
-    1: "Where would you like to live?",
-    2: "What are you looking for?",
-    3: "How many bedrooms?",
-    4: "What size fits your plan?",
-    5: "What's your financial capacity?",
-    6: "Which features matter to you?",
-    7: "What's your ideal timeline?",
+    1: t.titles[0],
+    2: t.titles[1],
+    3: t.titles[2],
+    4: t.titles[3],
+    5: t.titles[4],
+    6: t.titles[5],
+    7: t.titles[6],
   };
 
   return (
     <div className="mx-auto max-w-xl px-4 py-10 sm:py-16">
-      <OnboardingProgressHeader step={step} total={TOTAL_STEPS} title={titles[step]} />
+      <OnboardingProgressHeader step={step} total={TOTAL_STEPS} title={titles[step]} locale={locale} />
 
       <div className="min-h-[280px]">
         {step === 1 && (
           <div>
-            <p className="mb-5 text-sm text-muted-foreground">Select one or more areas you'd consider. You can change this anytime.</p>
+            <p className="mb-5 text-sm text-muted-foreground">{t.selectAreasHint}</p>
             <div className="flex flex-wrap gap-2">
               {locations.map((loc) => (
                 <Chip key={loc.id} selected={draft.locationIds.includes(loc.id)} onClick={() => toggleInArray("locationIds", loc.id)}>
@@ -179,9 +184,9 @@ export function OnboardingWizard({
                 key={type.value}
                 selected={draft.propertyType === type.value}
                 onClick={() => update("propertyType", type.value)}
-                title={type.label}
+                title={localizedPropertyType(type.value, locale, type.label)}
                 icon={PROPERTY_TYPE_ICONS[type.value] ?? Warehouse}
-                description={type.value === "APARTMENT" ? "Primary focus for Cascade today" : undefined}
+                description={type.value === "APARTMENT" ? t.primaryFocusNote : undefined}
               />
             ))}
           </div>
@@ -190,21 +195,21 @@ export function OnboardingWizard({
         {step === 3 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {BEDROOM_OPTIONS.map((b) => (
-              <OptionCard key={b.value} selected={draft.bedrooms === b.value} onClick={() => update("bedrooms", b.value)} title={b.label} description="bedrooms" />
+              <OptionCard key={b.value} selected={draft.bedrooms === b.value} onClick={() => update("bedrooms", b.value)} title={localizedBedroom(b.value, locale, b.label)} description={t.bedroomsWord} />
             ))}
           </div>
         )}
 
         {step === 4 && (
           <div className="space-y-5">
-            <p className="text-sm text-muted-foreground">Set your preferred apartment size range in square meters.</p>
+            <p className="text-sm text-muted-foreground">{t.sizeHint}</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="minSize">Minimum (m²)</Label>
+                <Label htmlFor="minSize">{t.minSize}</Label>
                 <Input id="minSize" type="number" min={20} value={draft.minSize} onChange={(e) => update("minSize", Number(e.target.value))} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maxSize">Maximum (m²)</Label>
+                <Label htmlFor="maxSize">{t.maxSize}</Label>
                 <Input id="maxSize" type="number" min={20} value={draft.maxSize} onChange={(e) => update("maxSize", Number(e.target.value))} />
               </div>
             </div>
@@ -217,24 +222,24 @@ export function OnboardingWizard({
         {step === 5 && (
           <div className="space-y-6">
             <div>
-              <p className="text-sm font-medium">Down payment</p>
+              <p className="text-sm font-medium">{t.downPaymentLabel}</p>
               <div className="mt-2 grid grid-cols-2 gap-4">
-                <NumberField label="Minimum ($)" value={draft.downPaymentMin} onChange={(v) => update("downPaymentMin", v)} />
-                <NumberField label="Maximum ($)" value={draft.downPaymentMax} onChange={(v) => update("downPaymentMax", v)} />
+                <NumberField label={t.minDollar} value={draft.downPaymentMin} onChange={(v) => update("downPaymentMin", v)} />
+                <NumberField label={t.maxDollar} value={draft.downPaymentMax} onChange={(v) => update("downPaymentMax", v)} />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium">Monthly payment</p>
+              <p className="text-sm font-medium">{t.monthlyPaymentLabel}</p>
               <div className="mt-2 grid grid-cols-2 gap-4">
-                <NumberField label="Minimum ($)" value={draft.monthlyMin} onChange={(v) => update("monthlyMin", v)} />
-                <NumberField label="Maximum ($)" value={draft.monthlyMax} onChange={(v) => update("monthlyMax", v)} />
+                <NumberField label={t.minDollar} value={draft.monthlyMin} onChange={(v) => update("monthlyMin", v)} />
+                <NumberField label={t.maxDollar} value={draft.monthlyMax} onChange={(v) => update("monthlyMax", v)} />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium">Payment duration (years)</p>
+              <p className="text-sm font-medium">{t.durationLabel}</p>
               <div className="mt-2 grid grid-cols-2 gap-4">
-                <NumberField label="Minimum" value={draft.durationMinYears} onChange={(v) => update("durationMinYears", v)} />
-                <NumberField label="Maximum" value={draft.durationMaxYears} onChange={(v) => update("durationMaxYears", v)} />
+                <NumberField label={t.min} value={draft.durationMinYears} onChange={(v) => update("durationMinYears", v)} />
+                <NumberField label={t.max} value={draft.durationMaxYears} onChange={(v) => update("durationMaxYears", v)} />
               </div>
             </div>
           </div>
@@ -242,11 +247,11 @@ export function OnboardingWizard({
 
         {step === 6 && (
           <div>
-            <p className="mb-5 text-sm text-muted-foreground">Optional — select any features that matter to you.</p>
+            <p className="mb-5 text-sm text-muted-foreground">{t.amenitiesHint}</p>
             <div className="flex flex-wrap gap-2">
               {AMENITIES.map((a) => (
                 <Chip key={a.key} selected={draft.amenities.includes(a.key)} onClick={() => toggleInArray("amenities", a.key)}>
-                  {a.label}
+                  {localizedAmenity(a.key, locale, a.label)}
                 </Chip>
               ))}
             </div>
@@ -255,8 +260,8 @@ export function OnboardingWizard({
 
         {step === 7 && (
           <div className="grid gap-3 sm:grid-cols-2">
-            {TIMELINE_OPTIONS.map((t) => (
-              <OptionCard key={t.value} selected={draft.timeline === t.value} onClick={() => update("timeline", t.value)} title={t.label} />
+            {TIMELINE_OPTIONS.map((opt) => (
+              <OptionCard key={opt.value} selected={draft.timeline === opt.value} onClick={() => update("timeline", opt.value)} title={localizedTimeline(opt.value, locale, opt.label)} />
             ))}
           </div>
         )}
@@ -267,11 +272,11 @@ export function OnboardingWizard({
       <div className="mt-10 flex items-center justify-between gap-3">
         <Button type="button" variant="ghost" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1 || loading}>
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t.back}
         </Button>
         <Button type="button" onClick={handleNext} disabled={!isStepValid || loading}>
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {step === TOTAL_STEPS ? (mode === "edit" ? "Save profile" : "See My Property Profile") : "Continue"}
+          {step === TOTAL_STEPS ? (mode === "edit" ? t.saveProfile : t.seeProfile) : t.continue}
           {!loading && <ArrowRight className="h-4 w-4" />}
         </Button>
       </div>

@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/utils";
+import { getDictionary, type Locale } from "@/lib/i18n";
+import { localizedPaymentStatus } from "@/lib/i18n/labels";
 
 export interface PaymentRow {
   id: string;
@@ -21,8 +23,9 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
   OVERDUE: "destructive",
 };
 
-export function PaymentScheduleTable({ payments }: { payments: PaymentRow[] }) {
+export function PaymentScheduleTable({ payments, locale = "en" }: { payments: PaymentRow[]; locale?: Locale }) {
   const [expanded, setExpanded] = useState(false);
+  const t = getDictionary(locale).paymentScheduleTable;
 
   const notPaid = payments.filter((p) => p.status !== "PAID");
   const paid = payments.filter((p) => p.status === "PAID");
@@ -36,10 +39,10 @@ export function PaymentScheduleTable({ payments }: { payments: PaymentRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Installment</TableHead>
-            <TableHead>Due date</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t.installment}</TableHead>
+            <TableHead>{t.dueDate}</TableHead>
+            <TableHead>{t.amount}</TableHead>
+            <TableHead>{t.status}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -49,7 +52,7 @@ export function PaymentScheduleTable({ payments }: { payments: PaymentRow[] }) {
               <TableCell className="font-tabular text-muted-foreground">{formatDate(payment.dueDate)}</TableCell>
               <TableCell className="font-tabular">{formatCurrency(payment.amount)}</TableCell>
               <TableCell>
-                <Badge variant={STATUS_VARIANT[payment.status] ?? "default"}>{payment.status}</Badge>
+                <Badge variant={STATUS_VARIANT[payment.status] ?? "default"}>{localizedPaymentStatus(payment.status, locale, payment.status)}</Badge>
               </TableCell>
             </TableRow>
           ))}
@@ -62,11 +65,11 @@ export function PaymentScheduleTable({ payments }: { payments: PaymentRow[] }) {
         >
           {expanded ? (
             <>
-              <ChevronUp className="h-4 w-4" /> Show less
+              <ChevronUp className="h-4 w-4" /> {t.showLess}
             </>
           ) : (
             <>
-              <ChevronDown className="h-4 w-4" /> Show full schedule ({hiddenCount} more)
+              <ChevronDown className="h-4 w-4" /> {t.showFull.replace("{n}", String(hiddenCount))}
             </>
           )}
         </button>

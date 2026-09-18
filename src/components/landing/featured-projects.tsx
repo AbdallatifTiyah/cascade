@@ -6,7 +6,8 @@ import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n";
 
 export async function FeaturedProjects() {
-  const t = getDictionary(getLocale()).landing.featuredProjects;
+  const locale = getLocale();
+  const t = getDictionary(locale).landing.featuredProjects;
   const projects = await db.project.findMany({
     where: { status: { in: ["FUNDRAISING", "CONSTRUCTION", "LAND_SECURED", "FINISHING"] } },
     include: { location: true, apartments: true, _count: { select: { participants: true } } },
@@ -41,6 +42,7 @@ export async function FeaturedProjects() {
               status={project.status}
               participantCount={project._count.participants}
               summary={summarizeProject(project.apartments, project.estimatedDeliveryDate)}
+              locale={locale}
             />
           ))}
         </div>

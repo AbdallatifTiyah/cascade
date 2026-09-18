@@ -10,11 +10,15 @@ import { PasswordForm } from "@/components/account/password-form";
 import { LogoutButton } from "@/components/account/logout-button";
 import { PropertyProfileCard } from "@/components/projects/property-profile-card";
 import { Avatar } from "@/components/ui/avatar";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function AccountPage() {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).accountPage;
   const preference = await db.propertyPreference.findUnique({
     where: { userId: user.id },
     include: { locations: { include: { location: true } } },
@@ -32,19 +36,19 @@ export default async function AccountPage() {
 
       <Tabs defaultValue="personal">
         <TabsList>
-          <TabsTrigger value="personal">Personal</TabsTrigger>
-          <TabsTrigger value="property">Property Profile</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="personal">{t.tabPersonal}</TabsTrigger>
+          <TabsTrigger value="property">{t.tabProperty}</TabsTrigger>
+          <TabsTrigger value="documents">{t.tabDocuments}</TabsTrigger>
+          <TabsTrigger value="security">{t.tabSecurity}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Personal information</CardTitle>
+              <CardTitle>{t.personalInfoTitle}</CardTitle>
             </CardHeader>
             <CardContent>
-              <PersonalInfoForm user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone }} />
+              <PersonalInfoForm user={{ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone }} locale={locale} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -52,6 +56,7 @@ export default async function AccountPage() {
         <TabsContent value="property" className="mt-6 space-y-6">
           {preference ? (
             <PropertyProfileCard
+              locale={locale}
               profile={{
                 locationNames: preference.locations.map((l) => l.location.name),
                 propertyType: preference.propertyType,
@@ -68,17 +73,17 @@ export default async function AccountPage() {
               }}
             />
           ) : (
-            <EmptyState title="No property profile yet" description="Complete onboarding to build your property plan." />
+            <EmptyState title={t.noPropertyTitle} description={t.noPropertyDesc} />
           )}
 
           <Card>
             <CardHeader className="flex-row items-center gap-2 space-y-0">
               <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <CardTitle>Payment methods</CardTitle>
+              <CardTitle>{t.paymentMethodsTitle}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Cascade currently tracks your payment plan as a structured ledger. Card and bank payment methods aren't connected yet.
+                {t.paymentMethodsDesc}
               </p>
             </CardContent>
           </Card>
@@ -87,7 +92,7 @@ export default async function AccountPage() {
         <TabsContent value="documents" className="mt-6">
           <Card>
             <CardContent className="p-6">
-              <EmptyState icon={FileText} title="No documents yet" description="Reservation and payment documents will appear here once available." />
+              <EmptyState icon={FileText} title={t.noDocumentsTitle} description={t.noDocumentsDesc} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -95,13 +100,13 @@ export default async function AccountPage() {
         <TabsContent value="security" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Change password</CardTitle>
+              <CardTitle>{t.changePasswordTitle}</CardTitle>
             </CardHeader>
             <CardContent>
-              <PasswordForm />
+              <PasswordForm locale={locale} />
             </CardContent>
           </Card>
-          <LogoutButton />
+          <LogoutButton locale={locale} />
         </TabsContent>
       </Tabs>
     </div>

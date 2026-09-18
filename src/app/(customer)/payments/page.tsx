@@ -10,11 +10,15 @@ import { PaymentScheduleTable } from "@/components/payments/payment-schedule-tab
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/utils";
 import { trackEvent } from "@/lib/audit";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Payments" };
 
 export default async function PaymentsPage() {
   const user = await requireUser();
+  const locale = getLocale();
+  const t = getDictionary(locale).paymentsPage;
 
   const plans = await db.paymentPlan.findMany({
     where: { reservation: { userId: user.id } },
@@ -27,11 +31,11 @@ export default async function PaymentsPage() {
     return (
       <EmptyState
         icon={Wallet}
-        title="No payment plan yet"
-        description="Reserve an apartment to see your payment schedule here."
+        title={t.emptyTitle}
+        description={t.emptyDesc}
         action={
           <LinkButton href="/projects" size="sm">
-            Explore projects
+            {t.exploreProjects}
           </LinkButton>
         }
       />
@@ -40,7 +44,7 @@ export default async function PaymentsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Payments</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.title}</h1>
 
       {plans.map((plan) => {
         const paid = plan.payments.filter((p) => p.status === "PAID").reduce((s, p) => s + p.amount, 0);
@@ -52,25 +56,25 @@ export default async function PaymentsPage() {
           <Card key={plan.id}>
             <CardHeader>
               <CardTitle>
-                {plan.reservation.project.name} · Apartment {plan.reservation.apartment.code}
+                {plan.reservation.project.name} · {locale === "ar" ? "شقة" : "Apartment"} {plan.reservation.apartment.code}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <Stat label="Total" value={formatCurrency(plan.totalAmount)} />
-                <Stat label="Paid" value={formatCurrency(paid)} />
-                <Stat label="Remaining" value={formatCurrency(remaining)} />
-                <Stat label="Next due" value={next ? formatDate(next.dueDate) : "—"} />
+                <Stat label={t.total} value={formatCurrency(plan.totalAmount)} />
+                <Stat label={t.paid} value={formatCurrency(paid)} />
+                <Stat label={t.remaining} value={formatCurrency(remaining)} />
+                <Stat label={t.nextDue} value={next ? formatDate(next.dueDate) : "—"} />
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Payment progress</span>
+                  <span className="font-medium">{t.paymentProgress}</span>
                   <span className="font-tabular text-muted-foreground">{Math.round(progress)}%</span>
                 </div>
                 <Progress value={progress} className="mt-2" indicatorClassName="bg-accent" />
               </div>
 
-              <PaymentScheduleTable payments={plan.payments} />
+              <PaymentScheduleTable payments={plan.payments} locale={locale} />
             </CardContent>
           </Card>
         );
