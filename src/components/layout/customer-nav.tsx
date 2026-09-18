@@ -7,20 +7,23 @@ import { Home, Building2, FolderKanban, Wallet, Bell, User, LogOut } from "lucid
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/layout/logo";
 import { Avatar } from "@/components/ui/avatar";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import type { Locale } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/i18n/en";
 
-const NAV_ITEMS = [
-  { href: "/profile", label: "Home", icon: Home },
-  { href: "/projects", label: "Projects", icon: Building2 },
-  { href: "/my-project", label: "My Project", icon: FolderKanban },
-  { href: "/payments", label: "Payments", icon: Wallet },
-  { href: "/account", label: "Profile", icon: User },
-];
-
-export function CustomerNav() {
+export function CustomerNav({ locale, t }: { locale: Locale; t: Dictionary }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
   const [firstName, lastName] = (user?.name ?? "").split(" ");
+
+  const NAV_ITEMS = [
+    { href: "/profile", label: t.nav.home, icon: Home },
+    { href: "/projects", label: t.nav.projects, icon: Building2 },
+    { href: "/my-project", label: t.nav.myProject, icon: FolderKanban },
+    { href: "/payments", label: t.nav.payments, icon: Wallet },
+    { href: "/account", label: t.nav.profile, icon: User },
+  ];
 
   return (
     <>
@@ -49,14 +52,15 @@ export function CustomerNav() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/notifications" className="relative rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label="Notifications">
+            <LocaleSwitcher locale={locale} label={t.common.languageToggle} />
+            <Link href="/notifications" className="relative rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label={t.nav.notifications}>
               <Bell className="h-5 w-5" />
             </Link>
             <Avatar firstName={firstName || "U"} lastName={lastName || ""} />
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-              aria-label="Log out"
+              aria-label={t.nav.logout}
             >
               <LogOut className="h-5 w-5" />
             </button>
@@ -67,9 +71,12 @@ export function CustomerNav() {
       {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur-md md:hidden">
         <Logo />
-        <Link href="/notifications" className="rounded-full p-2 text-muted-foreground" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <LocaleSwitcher locale={locale} label={t.common.languageToggle} />
+          <Link href="/notifications" className="rounded-full p-2 text-muted-foreground" aria-label={t.nav.notifications}>
+            <Bell className="h-5 w-5" />
+          </Link>
+        </div>
       </header>
 
       {/* Mobile bottom tab bar */}

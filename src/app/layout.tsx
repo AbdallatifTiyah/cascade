@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { isRtl } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: {
-    default: "Cascade — Real Estate Investment & Development",
-    template: "%s · Cascade",
+    default: "كاسكيد — للاستثمار والتطوير العقاري",
+    template: "%s · كاسكيد",
   },
   description:
-    "Tell Cascade what you need and what you can afford. Cascade matches you with real estate development opportunities designed around your plan.",
+    "أخبر كاسكيد بما تحتاجه وما تقدر عليه. كاسكيد تطابقك مع فرص تطوير عقاري مصممة حول خطتك.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = getLocale();
   return (
-    <html lang="en" dir="ltr">
+    <html lang={locale} dir={isRtl(locale) ? "rtl" : "ltr"}>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
       </body>

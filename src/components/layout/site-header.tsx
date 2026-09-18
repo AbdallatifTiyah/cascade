@@ -5,15 +5,18 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import type { Locale } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/i18n/en";
 
-const LINKS = [
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/projects", label: "Explore Projects" },
-  { href: "/#financial-planning", label: "Financial planning" },
-];
-
-export function SiteHeader() {
+export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary }) {
   const [open, setOpen] = useState(false);
+
+  const LINKS = [
+    { href: "/#how-it-works", label: t.nav.howItWorks },
+    { href: "/projects", label: t.nav.exploreProjects },
+    { href: "/#financial-planning", label: t.nav.financialPlanning },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-md">
@@ -29,11 +32,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <LocaleSwitcher locale={locale} label={t.common.languageToggle} />
           <LinkButton href="/login" variant="ghost" size="sm">
-            Log in
+            {t.nav.login}
           </LinkButton>
           <LinkButton href="/signup" variant="primary" size="sm">
-            Build My Property Plan
+            {t.nav.buildPlan}
           </LinkButton>
         </div>
 
@@ -56,11 +60,12 @@ export function SiteHeader() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2">
+              <LocaleSwitcher locale={locale} label={t.common.languageToggle} className="w-full justify-center" />
               <LinkButton href="/login" variant="outline" size="md">
-                Log in
+                {t.nav.login}
               </LinkButton>
               <LinkButton href="/signup" variant="primary" size="md">
-                Build My Property Plan
+                {t.nav.buildPlan}
               </LinkButton>
             </div>
           </nav>

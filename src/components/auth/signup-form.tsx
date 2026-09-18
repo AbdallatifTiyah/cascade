@@ -6,8 +6,9 @@ import { signIn } from "next-auth/react";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/en";
 
-export function SignupForm() {
+export function SignupForm({ t }: { t: Dictionary }) {
   const router = useRouter();
   const [step, setStep] = useState<"details" | "otp">("details");
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export function SignupForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? t.auth.somethingWentWrong);
         return;
       }
       setUserId(data.userId);
@@ -39,7 +40,7 @@ export function SignupForm() {
       setCredentials({ email: form.email, password: form.password });
       setStep("otp");
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.auth.networkError);
     } finally {
       setLoading(false);
     }
@@ -57,19 +58,19 @@ export function SignupForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Verification failed");
+        setError(data.error ?? t.auth.verificationFailed);
         return;
       }
       const result = await signIn("credentials", { ...credentials, redirect: false });
       if (result?.error) {
-        setError("Account created, but automatic sign-in failed. Please log in.");
+        setError(t.auth.accountCreatedLoginFailed);
         router.push("/login");
         return;
       }
       router.push("/onboarding");
       router.refresh();
     } catch {
-      setError("Network error. Please try again.");
+      setError(t.auth.networkError);
     } finally {
       setLoading(false);
     }
@@ -81,15 +82,14 @@ export function SignupForm() {
         <div className="flex items-start gap-3 rounded-xl border border-accent/30 bg-accent/10 p-4 text-sm">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
           <div>
-            <p className="font-medium text-foreground">Verify your email</p>
+            <p className="font-medium text-foreground">{t.auth.verifyEmail}</p>
             <p className="mt-1 text-muted-foreground">
-              Demo mode: no SMS/email provider is connected, so your code is shown here instead of being sent.
-              Your verification code is <span className="font-tabular font-semibold text-foreground">{demoOtp}</span>.
+              {t.auth.demoModePrefix} <span className="font-tabular font-semibold text-foreground">{demoOtp}</span>.
             </p>
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="code">6-digit code</Label>
+          <Label htmlFor="code">{t.auth.sixDigitCode}</Label>
           <Input
             id="code"
             inputMode="numeric"
@@ -98,13 +98,14 @@ export function SignupForm() {
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
             placeholder="123456"
             className="text-center text-lg tracking-[0.5em] font-tabular"
+            dir="ltr"
             required
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading || code.length !== 6}>
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Verify &amp; continue
+          {t.auth.verifyContinue}
         </Button>
       </form>
     );
@@ -114,36 +115,36 @@ export function SignupForm() {
     <form onSubmit={handleDetailsSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First name</Label>
+          <Label htmlFor="firstName">{t.auth.firstName}</Label>
           <Input id="firstName" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} autoComplete="given-name" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last name</Label>
+          <Label htmlFor="lastName">{t.auth.lastName}</Label>
           <Input id="lastName" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} autoComplete="family-name" />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t.auth.emailLabel}</Label>
         <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} autoComplete="email" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone (optional)</Label>
-        <Input id="phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} autoComplete="tel" placeholder="+970 59 000 0000" />
+        <Label htmlFor="phone">{t.auth.phoneOptional}</Label>
+        <Input id="phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} autoComplete="tel" placeholder="+970 59 000 0000" dir="ltr" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t.auth.passwordLabel}</Label>
         <Input id="password" type="password" required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} autoComplete="new-password" />
-        <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+        <p className="text-xs text-muted-foreground">{t.auth.passwordHint}</p>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        Create account
+        {t.auth.createAccount}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
+        {t.auth.alreadyHaveAccount}{" "}
         <a href="/login" className="font-medium text-foreground underline underline-offset-4">
-          Log in
+          {t.auth.loginLink}
         </a>
       </p>
     </form>

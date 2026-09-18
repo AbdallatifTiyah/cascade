@@ -1,23 +1,19 @@
 import { Logo } from "@/components/layout/logo";
 import { CheckCircle2 } from "lucide-react";
-
-const POINTS = [
-  "Matched against your real budget and timeline",
-  "Explainable match scores — never a black box",
-  "Track construction and payments in one place",
-];
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n";
 
 export function AuthShell({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
+  const t = getDictionary(getLocale()).auth;
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
         <Logo dark />
         <div className="max-w-sm">
-          <h2 className="text-3xl font-semibold leading-tight tracking-tight">
-            Real estate development, shaped by real demand.
-          </h2>
+          <h2 className="text-3xl font-semibold leading-tight tracking-tight">{t.authShellHeadline}</h2>
           <ul className="mt-8 space-y-4">
-            {POINTS.map((p) => (
+            {t.authShellPoints.map((p) => (
               <li key={p} className="flex items-start gap-3 text-sm text-primary-foreground/80">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 {p}
@@ -25,7 +21,7 @@ export function AuthShell({ children, title, subtitle }: { children: React.React
             ))}
           </ul>
         </div>
-        <p className="text-xs text-primary-foreground/40">Cascade Real Estate Investment &amp; Development</p>
+        <p className="text-xs text-primary-foreground/40">{t.authShellFooter}</p>
       </div>
 
       <div className="flex flex-col items-center justify-center px-4 py-12 sm:px-6">
