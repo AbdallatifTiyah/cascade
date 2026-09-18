@@ -353,6 +353,10 @@ export interface Dictionary {
     available: string;
     reservedAllocated: string;
     unavailable: string;
+    listView: string;
+    floorPlanView: string;
+    viewDetails: string;
+    hoverHint: string;
   };
   comparePage: {
     title: string;

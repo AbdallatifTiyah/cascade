@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BedDouble, Ruler, Scale } from "lucide-react";
+import { BedDouble, Ruler, Scale, List, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
 import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 import { Button } from "@/components/ui/button";
 import { getDictionary, type Locale } from "@/lib/i18n";
 import { localizedApartmentStatus } from "@/lib/i18n/labels";
+import { FloorPlanView } from "@/components/apartments/floor-plan-view";
 
 export interface ApartmentListItem {
   id: string;
@@ -28,6 +29,7 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
   const floors = useMemo(() => [...new Set(apartments.map((a) => a.floor))].sort((a, b) => b - a), [apartments]);
   const [activeFloor, setActiveFloor] = useState<number>(floors[0]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<"list" | "plan">("list");
 
   const unitsOnFloor = apartments.filter((a) => a.floor === activeFloor);
 
@@ -41,21 +43,53 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
 
   return (
     <div>
-      <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-        {floors.map((floor) => (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
+          {floors.map((floor) => (
+            <button
+              key={floor}
+              onClick={() => setActiveFloor(floor)}
+              className={cn(
+                "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                activeFloor === floor ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-foreground/30"
+              )}
+            >
+              {t.floor} {floor}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 rounded-full border border-border bg-card p-1">
           <button
-            key={floor}
-            onClick={() => setActiveFloor(floor)}
+            onClick={() => setViewMode("list")}
+            aria-pressed={viewMode === "list"}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-              activeFloor === floor ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-foreground/30"
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+              viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {t.floor} {floor}
+            <List className="h-3.5 w-3.5" />
+            {t.listView}
           </button>
-        ))}
+          <button
+            onClick={() => setViewMode("plan")}
+            aria-pressed={viewMode === "plan"}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+              viewMode === "plan" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            {t.floorPlanView}
+          </button>
+        </div>
       </div>
 
+      {viewMode === "plan" ? (
+        <div className="mt-5">
+          <FloorPlanView projectSlug={projectSlug} units={unitsOnFloor} locale={locale} />
+        </div>
+      ) : (
       <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {unitsOnFloor.map((apt) => {
           const style = APARTMENT_STATUS_STYLE[apt.status] ?? APARTMENT_STATUS_STYLE.UNAVAILABLE;
@@ -121,8 +155,9 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
           );
         })}
       </div>
+      )}
 
-      {compareIds.length > 0 && (
+      {viewMode === "list" && compareIds.length > 0 && (
         <div className="fixed inset-x-0 bottom-16 z-30 flex justify-center px-4 md:bottom-6">
           <div className="flex items-center gap-4 rounded-full border border-border bg-card px-5 py-3 shadow-elevated">
             <span className="text-sm font-medium">{compareIds.length} {t.selected}</span>

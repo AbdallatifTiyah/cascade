@@ -420,6 +420,10 @@ const ar: Dictionary = {
     available: "متاحة",
     reservedAllocated: "محجوزة / مخصصة",
     unavailable: "غير متاحة",
+    listView: "قائمة",
+    floorPlanView: "مخطط الطابق",
+    viewDetails: "عرض التفاصيل",
+    hoverHint: "مرّر أو اضغط على وحدة لعرض تفاصيلها",
   },
   comparePage: {
     title: "قارن الشقق",
