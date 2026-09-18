@@ -6,6 +6,8 @@ import { getLocale } from "@/lib/i18n/get-locale";
 import { isRtl } from "@/lib/i18n";
 import { plusJakarta, cairo } from "./fonts";
 import { cn } from "@/lib/utils";
+import { UpdateChecker } from "@/components/update-checker";
+import { BUILD_VERSION } from "@/lib/build-version";
 
 export const metadata: Metadata = {
   title: {
@@ -40,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <style>{".reveal { opacity: 1 !important; transform: none !important; }"}</style>
         </noscript>
         <Providers>{children}</Providers>
+        <UpdateChecker initialVersion={BUILD_VERSION} locale={locale} />
         <Script id="register-sw" strategy="afterInteractive">
           {`if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); }); }`}
         </Script>

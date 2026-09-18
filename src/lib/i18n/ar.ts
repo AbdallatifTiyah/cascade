@@ -480,6 +480,12 @@ const ar: Dictionary = {
     investors: "مستثمر انضم",
     apartmentsLeft: "شقة متبقية",
   },
+  appUpdate: {
+    title: "يتوفر إصدار جديد",
+    description: "حدّث للحصول على آخر الميزات والإصلاحات.",
+    updateNow: "تحديث الآن",
+    later: "لاحقاً",
+  },
 };
 
 export default ar;

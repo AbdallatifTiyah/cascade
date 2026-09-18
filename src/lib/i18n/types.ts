@@ -413,4 +413,10 @@ export interface Dictionary {
     investors: string;
     apartmentsLeft: string;
   };
+  appUpdate: {
+    title: string;
+    description: string;
+    updateNow: string;
+    later: string;
+  };
 }

@@ -473,6 +473,12 @@ const en: Dictionary = {
     investors: "investors joined",
     apartmentsLeft: "apartments left",
   },
+  appUpdate: {
+    title: "A new version is available",
+    description: "Update to get the latest features and fixes.",
+    updateNow: "Update now",
+    later: "Later",
+  },
 };
 
 export default en;
