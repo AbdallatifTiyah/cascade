@@ -9,11 +9,14 @@ import { getDictionary, type Locale } from "@/lib/i18n";
 import { localizedApartmentStatus } from "@/lib/i18n/labels";
 import type { ApartmentListItem } from "./apartment-selector";
 
-const MARGIN = 3;
-const ROW_H = 36;
-const CORRIDOR_H = 14;
+const LABEL_W = 9;
+const MARGIN = 2;
+const FLOOR_H = 9;
+const ROOF_H = 6;
+const GROUND_H = 5;
 const CANVAS_W = 100;
-const CANVAS_H = MARGIN * 2 + ROW_H * 2 + CORRIDOR_H;
+const BUILDING_X = LABEL_W + MARGIN;
+const BUILDING_W = CANVAS_W - BUILDING_X - MARGIN;
 
 interface LaidOutUnit extends ApartmentListItem {
   x: number;
@@ -22,32 +25,30 @@ interface LaidOutUnit extends ApartmentListItem {
   h: number;
 }
 
-function layoutFloor(units: ApartmentListItem[]): LaidOutUnit[] {
-  const top: ApartmentListItem[] = [];
-  const bottom: ApartmentListItem[] = [];
-  units.forEach((u, i) => (i % 2 === 0 ? top : bottom).push(u));
+function layoutBuilding(apartments: ApartmentListItem[]): { floors: number[]; units: LaidOutUnit[]; canvasH: number } {
+  const floors = [...new Set(apartments.map((a) => a.floor))].sort((a, b) => b - a);
+  const top = MARGIN + ROOF_H;
+  const units: LaidOutUnit[] = [];
 
-  const usableW = CANVAS_W - MARGIN * 2;
-  const topY = MARGIN;
-  const bottomY = MARGIN + ROW_H + CORRIDOR_H;
-
-  function placeRow(row: ApartmentListItem[], y: number): LaidOutUnit[] {
-    if (row.length === 0) return [];
-    const minW = usableW / (row.length * 2.2);
+  floors.forEach((floor, floorIndex) => {
+    const row = apartments.filter((a) => a.floor === floor).sort((a, b) => a.code.localeCompare(b.code));
+    const y = top + floorIndex * FLOOR_H;
+    if (row.length === 0) return;
+    const minW = BUILDING_W / (row.length * 2.2);
     const totalArea = row.reduce((s, u) => s + u.area, 0) || 1;
-    const rawWidths = row.map((u) => Math.max((u.area / totalArea) * usableW, minW));
+    const rawWidths = row.map((u) => Math.max((u.area / totalArea) * BUILDING_W, minW));
     const rawTotal = rawWidths.reduce((s, w) => s + w, 0);
-    const scale = usableW / rawTotal;
-    let cursor = MARGIN;
-    return row.map((u, i) => {
+    const scale = BUILDING_W / rawTotal;
+    let cursor = BUILDING_X;
+    row.forEach((u, i) => {
       const w = rawWidths[i] * scale;
-      const placed: LaidOutUnit = { ...u, x: cursor, y, w, h: ROW_H };
+      units.push({ ...u, x: cursor, y, w, h: FLOOR_H });
       cursor += w;
-      return placed;
     });
-  }
+  });
 
-  return [...placeRow(top, topY), ...placeRow(bottom, bottomY)];
+  const canvasH = top + floors.length * FLOOR_H + GROUND_H + MARGIN;
+  return { floors, units, canvasH };
 }
 
 const STATUS_FILL: Record<string, string> = {
@@ -74,48 +75,75 @@ const STATUS_BADGE: Record<string, string> = {
   COMPLETED: "bg-muted text-muted-foreground",
 };
 
-export function FloorPlanView({
+export function BuildingPlanView({
   projectSlug,
-  units,
+  apartments,
   locale = "en",
 }: {
   projectSlug: string;
-  units: ApartmentListItem[];
+  apartments: ApartmentListItem[];
   locale?: Locale;
 }) {
   const router = useRouter();
   const t = getDictionary(locale).apartmentSelector;
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const laidOut = useMemo(() => layoutFloor(units), [units]);
-  const active = laidOut.find((u) => u.id === activeId) ?? null;
+  const { floors, units, canvasH } = useMemo(() => layoutBuilding(apartments), [apartments]);
+  const active = units.find((u) => u.id === activeId) ?? null;
+
+  const roofTop = MARGIN;
+  const buildingBottom = MARGIN + ROOF_H + floors.length * FLOOR_H;
 
   return (
     <div>
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <svg
-          viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-          className="w-full select-none"
-          role="img"
-          aria-label={t.floorPlanView}
-        >
+      <div className="overflow-hidden rounded-xl border border-border bg-card p-2">
+        <svg viewBox={`0 0 ${CANVAS_W} ${canvasH}`} className="w-full select-none" role="img" aria-label={t.floorPlanView}>
+          {/* roof */}
+          <polygon
+            points={`${BUILDING_X - 2},${roofTop + ROOF_H} ${BUILDING_X + BUILDING_W / 2},${roofTop} ${BUILDING_X + BUILDING_W + 2},${roofTop + ROOF_H}`}
+            className="fill-foreground/80"
+          />
+          {/* building outline */}
           <rect
-            x={0.5}
-            y={0.5}
-            width={CANVAS_W - 1}
-            height={CANVAS_H - 1}
-            rx={2}
+            x={BUILDING_X}
+            y={MARGIN + ROOF_H}
+            width={BUILDING_W}
+            height={floors.length * FLOOR_H}
             className="fill-background stroke-border"
             strokeWidth={0.4}
           />
+          {/* floor slab dividers + labels */}
+          {floors.map((floor, i) => {
+            const y = MARGIN + ROOF_H + i * FLOOR_H;
+            return (
+              <g key={floor}>
+                {i > 0 && (
+                  <line x1={BUILDING_X} y1={y} x2={BUILDING_X + BUILDING_W} y2={y} className="stroke-border" strokeWidth={0.3} />
+                )}
+                <text
+                  x={LABEL_W - 1}
+                  y={y + FLOOR_H / 2}
+                  textAnchor="end"
+                  dominantBaseline="middle"
+                  className="fill-muted-foreground font-tabular"
+                  style={{ fontSize: "3px", fontWeight: 600 }}
+                >
+                  {floor}
+                </text>
+              </g>
+            );
+          })}
+          {/* ground / plinth */}
+          <rect x={BUILDING_X - 3} y={buildingBottom} width={BUILDING_W + 6} height={GROUND_H} className="fill-foreground/80" />
           <rect
-            x={MARGIN}
-            y={MARGIN + ROW_H}
-            width={CANVAS_W - MARGIN * 2}
-            height={CORRIDOR_H}
-            className="fill-muted/60"
+            x={BUILDING_X + BUILDING_W / 2 - 4}
+            y={buildingBottom}
+            width={8}
+            height={GROUND_H}
+            className="fill-background"
           />
-          {laidOut.map((u) => {
+
+          {units.map((u) => {
             const clickable = u.status === "AVAILABLE";
             const isActive = u.id === activeId;
             return (
@@ -136,30 +164,23 @@ export function FloorPlanView({
                 }}
               >
                 <rect
-                  x={u.x + 0.6}
-                  y={u.y + 0.6}
-                  width={Math.max(u.w - 1.2, 0)}
-                  height={u.h - 1.2}
-                  rx={1.2}
+                  x={u.x + 0.3}
+                  y={u.y + 0.4}
+                  width={Math.max(u.w - 0.6, 0)}
+                  height={u.h - 0.8}
                   className={cn(
                     "transition-all",
                     STATUS_FILL[u.status] ?? STATUS_FILL.UNAVAILABLE,
                     STATUS_STROKE[u.status] ?? STATUS_STROKE.UNAVAILABLE,
                     isActive && "fill-primary/25"
                   )}
-                  strokeWidth={isActive ? 0.9 : 0.5}
+                  strokeWidth={isActive ? 0.7 : 0.25}
                 />
-                {u.w > 8 && (
-                  <text
-                    x={u.x + u.w / 2}
-                    y={u.y + u.h / 2}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="fill-foreground font-tabular"
-                    style={{ fontSize: "3.2px", fontWeight: 600 }}
-                  >
-                    {u.code}
-                  </text>
+                {u.w > 6 && (
+                  <>
+                    <rect x={u.x + u.w * 0.22} y={u.y + u.h * 0.3} width={u.w * 0.18} height={u.h * 0.32} className="fill-foreground/15" />
+                    <rect x={u.x + u.w * 0.6} y={u.y + u.h * 0.3} width={u.w * 0.18} height={u.h * 0.32} className="fill-foreground/15" />
+                  </>
                 )}
               </g>
             );
@@ -190,7 +211,7 @@ export function FloorPlanView({
                   <BedDouble className="h-3 w-3" /> {active.bedrooms} {locale === "ar" ? "غرف" : "bed"}
                 </span>
                 <span className="flex items-center gap-1">
-                  <DoorOpen className="h-3 w-3" /> {t.floor} {units.find((u) => u.id === active.id)?.floor}
+                  <DoorOpen className="h-3 w-3" /> {t.floor} {active.floor}
                 </span>
               </div>
             </div>

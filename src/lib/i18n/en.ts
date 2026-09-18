@@ -414,9 +414,9 @@ const en: Dictionary = {
     reservedAllocated: "Reserved / Allocated",
     unavailable: "Unavailable",
     listView: "List",
-    floorPlanView: "Floor plan",
+    floorPlanView: "Building",
     viewDetails: "View details",
-    hoverHint: "Hover or tap a unit to see its details",
+    hoverHint: "Hover or tap a unit on the building to see its details",
   },
   comparePage: {
     title: "Compare apartments",

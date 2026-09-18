@@ -421,9 +421,9 @@ const ar: Dictionary = {
     reservedAllocated: "محجوزة / مخصصة",
     unavailable: "غير متاحة",
     listView: "قائمة",
-    floorPlanView: "مخطط الطابق",
+    floorPlanView: "مخطط العمارة",
     viewDetails: "عرض التفاصيل",
-    hoverHint: "مرّر أو اضغط على وحدة لعرض تفاصيلها",
+    hoverHint: "مرّر أو اضغط على وحدة في العمارة لعرض تفاصيلها",
   },
   comparePage: {
     title: "قارن الشقق",

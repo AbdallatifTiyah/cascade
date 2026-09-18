@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BedDouble, Ruler, Scale, List, LayoutGrid } from "lucide-react";
+import { BedDouble, Ruler, Scale, List, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
 import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 import { Button } from "@/components/ui/button";
 import { getDictionary, type Locale } from "@/lib/i18n";
 import { localizedApartmentStatus } from "@/lib/i18n/labels";
-import { FloorPlanView } from "@/components/apartments/floor-plan-view";
+import { BuildingPlanView } from "@/components/apartments/building-plan-view";
 
 export interface ApartmentListItem {
   id: string;
@@ -44,20 +44,24 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-          {floors.map((floor) => (
-            <button
-              key={floor}
-              onClick={() => setActiveFloor(floor)}
-              className={cn(
-                "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                activeFloor === floor ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-foreground/30"
-              )}
-            >
-              {t.floor} {floor}
-            </button>
-          ))}
-        </div>
+        {viewMode === "list" ? (
+          <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
+            {floors.map((floor) => (
+              <button
+                key={floor}
+                onClick={() => setActiveFloor(floor)}
+                className={cn(
+                  "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                  activeFloor === floor ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-foreground/30"
+                )}
+              >
+                {t.floor} {floor}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div />
+        )}
 
         <div className="flex shrink-0 items-center gap-1 rounded-full border border-border bg-card p-1">
           <button
@@ -79,7 +83,7 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
               viewMode === "plan" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <LayoutGrid className="h-3.5 w-3.5" />
+            <Building2 className="h-3.5 w-3.5" />
             {t.floorPlanView}
           </button>
         </div>
@@ -87,7 +91,7 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
 
       {viewMode === "plan" ? (
         <div className="mt-5">
-          <FloorPlanView projectSlug={projectSlug} units={unitsOnFloor} locale={locale} />
+          <BuildingPlanView projectSlug={projectSlug} apartments={apartments} locale={locale} />
         </div>
       ) : (
       <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
