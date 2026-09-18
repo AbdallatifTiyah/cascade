@@ -32,3 +32,21 @@ next-env.d.ts
 /prisma/dev.db
 /prisma/dev.db-journal
 /prisma/migrations/dev
+
+# Android (Capacitor) — keep the project, ignore build output & local machine config
+/android/.gradle
+/android/build
+/android/app/build
+/android/local.properties
+/android/captures
+/android/.idea
+*.keystore
+*.jks
+
+# iOS (Capacitor) — keep the project, ignore derived/user files & pods
+/ios/App/Pods
+/ios/App/build
+/ios/App/DerivedData
+/ios/App/App/public
+/ios/**/*.xcuserstate
+/ios/**/xcuserdata

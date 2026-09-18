@@ -234,15 +234,58 @@ DATABASE_URL="<your direct connection string>" npx tsx prisma/seed.ts
 After that, redeploying from Vercel (e.g. a new push to the branch) reuses
 the same database — you don't need to reseed on every deploy.
 
-## Future mobile strategy
+## Mobile app
+
+Two layers, so people can try Cascade as an "app" today while the real
+native apps come together:
+
+### 1. Installable PWA (works right now, no build needed)
+
+The site ships a web manifest (`public/manifest.webmanifest`), app icons
+(`public/icons/`), and a minimal service worker (`public/sw.js`). Anyone who
+opens the deployed URL in Chrome (Android) or Safari (iOS) can tap **"Add to
+Home Screen"** / **"Install app"** and get a standalone icon that opens
+without browser chrome — no APK to send, works immediately for anyone with
+the link.
+
+### 2. Native Android/iOS shells (Capacitor)
+
+`capacitor.config.ts` + the `android/` and `ios/` folders wrap the live site
+(`server.url` in the config) in a real native WebView shell — same
+architecture as most "hybrid" apps, and the right fit here since Cascade is
+a server-rendered app with auth/cookies/API routes (not a static export).
+Update `server.url` if the production domain changes.
+
+**Getting a real APK to hand out:** this dev environment can't reach
+`dl.google.com` (blocked network policy), so Android's Gradle plugin can't
+resolve here. Instead, `.github/workflows/build-android.yml` builds it on
+GitHub's own runners (unrestricted network):
+
+1. Push this repo to GitHub (already done if you're reading this on
+   `main`).
+2. Go to **Actions → Build Android APK → Run workflow** (or just push a
+   change under `android/`, which triggers it automatically).
+3. Download the `cascade-debug-apk` artifact when the run finishes — that
+   `app-debug.apk` is installable on any Android phone with "install from
+   unknown sources" allowed. It's a debug build, so it's fine to hand out
+   for trying the app, but sign a release build before any real
+   distribution (Play Store or otherwise).
+
+**iOS:** the `ios/` Xcode project is scaffolded and ready, but Apple builds
+need Xcode on macOS plus your own Apple Developer account/signing
+certificates for a real IPA — GitHub Actions has macOS runners (`runs-on:
+macos-latest`) if you want to automate this too, but code signing has to be
+set up with your own Apple credentials first, so it isn't wired up yet.
+
+Local development: `npx cap sync android` / `npx cap sync ios` after
+`capacitor.config.ts` changes, then open `android/` in Android Studio or
+`ios/App/App.xcworkspace` in Xcode if you have those installed locally.
 
 Nothing in `src/lib/` (matching, feasibility, finance, land scoring, demand
 aggregation) imports React or Next.js — those modules, plus the
-`src/app/api/**` Route Handlers, are the reusable core. A React Native/Expo
-app would reuse those same API endpoints and could share the pure `src/lib`
-calculation modules directly (they're plain TypeScript). No backend rewrite is
-needed to add iOS/Android — only new native UI screens calling the existing
-API.
+`src/app/api/**` Route Handlers, are the reusable core if you outgrow the
+WebView shell and want fully native screens later; they could be called
+directly from a React Native/Expo app too.
 
 ## What's simplified for this MVP
 
