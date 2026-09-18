@@ -35,7 +35,12 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest ships a full Android SDK at $ANDROID_HOME already;
+      # android-actions/setup-android tries to also fetch the legacy
+      # "tools" package, which no longer exists in Google's repo and fails
+      # the whole job -- so just accept licenses on the pre-installed SDK.
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
 
       - name: Build debug APK
         working-directory: android
