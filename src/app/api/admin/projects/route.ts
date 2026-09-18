@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     serviceFeeRate: data.serviceFeeRate,
     managementFeeRate: data.managementFeeRate,
     maintenanceFeeRate: data.maintenanceFeeRate,
+    expectedYieldRate: data.expectedYieldRate,
   });
 
   const project = await db.project.create({

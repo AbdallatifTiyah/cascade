@@ -36,6 +36,11 @@ export interface Dictionary {
     heroCtaPrimary: string;
     heroCtaSecondary: string;
     heroNote: string;
+    heroStats: {
+      projects: string;
+      investors: string;
+      apartments: string;
+    };
     howItWorks: {
       title: string;
       subtitle: string;
@@ -395,5 +400,17 @@ export interface Dictionary {
     total: string;
     perYear: string;
     note: string;
+  };
+  investmentReturn: {
+    title: string;
+    yieldLabel: string;
+    annualReturnLabel: string;
+    perYear: string;
+    note: string;
+  };
+  fundingProgress: {
+    funded: string;
+    investors: string;
+    apartmentsLeft: string;
   };
 }

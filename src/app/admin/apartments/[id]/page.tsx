@@ -54,6 +54,7 @@ export default async function AdminApartmentDetailPage({ params }: { params: Pro
           <Stat label="Current down payment" value={formatCurrency(apartment.downPayment)} />
           <Stat label="Current monthly" value={formatCurrency(apartment.monthlyPayment)} />
           <Stat label="Current annual fees" value={formatCurrency(apartment.serviceFeeAnnual + apartment.managementFeeAnnual + apartment.maintenanceFeeAnnual)} />
+          <Stat label="Current expected return" value={`${formatCurrency(apartment.expectedYieldAnnual)}/yr`} />
         </CardContent>
       </Card>
 
@@ -68,6 +69,7 @@ export default async function AdminApartmentDetailPage({ params }: { params: Pro
           serviceFeeAnnual: apartment.serviceFeeAnnual,
           managementFeeAnnual: apartment.managementFeeAnnual,
           maintenanceFeeAnnual: apartment.maintenanceFeeAnnual,
+          expectedYieldAnnual: apartment.expectedYieldAnnual,
         }}
       />
     </div>

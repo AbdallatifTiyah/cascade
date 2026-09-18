@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { FinancialPlanCard } from "@/components/projects/financial-plan-card";
 import { AnnualFeesCard } from "@/components/apartments/annual-fees-card";
+import { InvestmentReturnCard } from "@/components/apartments/investment-return-card";
 import { APARTMENT_STATUS_STYLE } from "@/lib/apartments";
 import { amenityLabel } from "@/lib/constants";
 import { trackEvent } from "@/lib/audit";
@@ -103,6 +104,8 @@ export default async function ApartmentDetailPage({ params }: { params: Promise<
 
         <div className="space-y-6">
           <FinancialPlanCard totalPrice={apartment.price} downPayment={apartment.downPayment} durationMonths={apartment.durationMonths} locale={locale} />
+
+          <InvestmentReturnCard price={apartment.price} expectedYieldAnnual={apartment.expectedYieldAnnual} locale={locale} />
 
           <AnnualFeesCard
             fees={{

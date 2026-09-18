@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { MapPin, Users, BedDouble, Ruler } from "lucide-react";
+import { MapPin, BedDouble, Ruler } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCover } from "@/components/ui/cover";
 import { MatchBadge } from "@/components/ui/match-badge";
+import { FundingProgress } from "@/components/projects/funding-progress";
 import { formatCurrency } from "@/lib/currency";
 import { PROJECT_STATUS_LABEL } from "@/lib/constants";
 import type { ProjectSummary } from "@/lib/projects/summary";
@@ -34,10 +35,11 @@ export function ProjectCard({
   locale?: Locale;
 }) {
   const t = getDictionary(locale).projectCard;
+  const fundedPercent = summary.totalCount > 0 ? ((summary.totalCount - summary.availableCount) / summary.totalCount) * 100 : 0;
   return (
-    <Card className="group flex flex-col overflow-hidden transition-shadow hover:shadow-elevated">
+    <Card className="group flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated">
       <Link href={`/projects/${slug}`} className="flex flex-1 flex-col">
-        <ProjectCover theme={coverTheme} className="h-40 w-full">
+        <ProjectCover theme={coverTheme} className="h-40 w-full transition-transform duration-500 group-hover:scale-105">
           <div className="absolute right-3 top-3">
             {matchScore !== undefined ? (
               <MatchBadge score={matchScore} locale={locale} />
@@ -49,7 +51,7 @@ export function ProjectCard({
 
         <div className="flex flex-1 flex-col p-5">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-lg font-semibold leading-tight">{name}</h3>
+            <h3 className="text-lg font-semibold leading-tight transition-colors group-hover:text-accent">{name}</h3>
           </div>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" /> {locationName}
@@ -66,19 +68,19 @@ export function ProjectCard({
                 ? (summary.bedroomsMin === summary.bedroomsMax ? `${summary.bedroomsMin} غرف` : `${summary.bedroomsMin}–${summary.bedroomsMax} غرف`)
                 : (summary.bedroomsMin === summary.bedroomsMax ? `${summary.bedroomsMin} bed` : `${summary.bedroomsMin}–${summary.bedroomsMax} bed`)}
             </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
-              {participantCount} {t.joinedSuffix}
-            </span>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
+          <div className="mt-4 border-t border-border pt-4">
+            <FundingProgress fundedPercent={fundedPercent} investorCount={participantCount} locale={locale} compact />
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
             <div>
               <p className="font-tabular text-sm font-semibold">{formatCurrency(summary.minDownPayment)}</p>
               <p className="text-[11px] text-muted-foreground">{t.initial}</p>
             </div>
             <div>
-              <p className="font-tabular text-sm font-semibold">{formatCurrency(summary.minMonthlyPayment)}/mo</p>
+              <p className="font-tabular text-sm font-semibold">{formatCurrency(summary.minMonthlyPayment)}{locale === "ar" ? "/شهرياً" : "/mo"}</p>
               <p className="text-[11px] text-muted-foreground">{t.monthly}</p>
             </div>
             <div>

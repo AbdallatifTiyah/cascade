@@ -12,6 +12,8 @@ import { LinkButton } from "@/components/ui/button";
 import { MatchBadge } from "@/components/ui/match-badge";
 import { MatchExplanation } from "@/components/projects/match-explanation";
 import { FinancialPlanCard } from "@/components/projects/financial-plan-card";
+import { FundingProgress } from "@/components/projects/funding-progress";
+import { InvestmentReturnCard } from "@/components/apartments/investment-return-card";
 import { amenityLabel, PROJECT_STATUS_LABEL } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { trackEvent } from "@/lib/audit";
@@ -43,6 +45,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const available = project.apartments.filter((a) => a.status === "AVAILABLE");
   const cheapest = [...available].sort((a, b) => a.price - b.price)[0] ?? project.apartments[0];
   const amenities: string[] = JSON.parse(project.amenities || "[]");
+  const totalUnits = project.apartments.length;
+  const fundedPercent = totalUnits > 0 ? ((totalUnits - available.length) / totalUnits) * 100 : 0;
 
   return (
     <div className="space-y-8">
@@ -71,6 +75,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       <p className="max-w-3xl leading-relaxed text-muted-foreground">{project.description}</p>
 
+      <Card>
+        <CardContent className="p-5">
+          <FundingProgress
+            fundedPercent={fundedPercent}
+            investorCount={project._count.participants}
+            apartmentsLeft={available.length}
+            locale={locale}
+          />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
@@ -84,7 +99,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <Stat icon={ArrowUpDown} label={t.floors} value={`${project.totalFloors}`} />
                 <Stat icon={Car} label={t.parking} value={project.parkingAvailable ? t.available : t.notIncluded} />
                 <Stat icon={Building2} label={t.elevator} value={project.elevatorAvailable ? t.yes : t.no} />
-                <Stat icon={Calendar} label={t.estDelivery} value={formatDate(project.estimatedDeliveryDate, { month: "long", year: "numeric" })} />
+                <Stat icon={Calendar} label={t.estDelivery} value={formatDate(project.estimatedDeliveryDate, { month: "long", year: "numeric" }, locale === "ar" ? "ar" : "en-US")} />
               </dl>
 
               {amenities.length > 0 && (
@@ -164,6 +179,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               durationMonths={cheapest.durationMonths}
               locale={locale}
             />
+          )}
+
+          {cheapest && (
+            <InvestmentReturnCard price={cheapest.price} expectedYieldAnnual={cheapest.expectedYieldAnnual} locale={locale} />
           )}
         </div>
       </div>

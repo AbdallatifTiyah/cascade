@@ -23,5 +23,6 @@ export const projectCreateSchema = z.object({
   serviceFeeRate: z.number().min(0).max(0.2).default(0.015),
   managementFeeRate: z.number().min(0).max(0.2).default(0.01),
   maintenanceFeeRate: z.number().min(0).max(0.2).default(0.005),
+  expectedYieldRate: z.number().min(0).max(0.3).default(0.07),
 });
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>;

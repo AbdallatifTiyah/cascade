@@ -39,6 +39,11 @@ const en: Dictionary = {
     heroCtaPrimary: "Build My Property Plan",
     heroCtaSecondary: "Explore Projects",
     heroNote: "Demo accounts available — no commitment required to explore.",
+    heroStats: {
+      projects: "active projects",
+      investors: "investors joined",
+      apartments: "apartments available",
+    },
     howItWorks: {
       title: "How Cascade works",
       subtitle: "A different starting point: your demand shapes what gets built, not the other way around.",
@@ -455,6 +460,18 @@ const en: Dictionary = {
     total: "Total per year",
     perYear: "/yr",
     note: "Estimated recurring costs, billed annually once you take ownership. These are separate from your purchase price and payment plan.",
+  },
+  investmentReturn: {
+    title: "Expected Investment Return",
+    yieldLabel: "Estimated annual yield",
+    annualReturnLabel: "Estimated annual return",
+    perYear: "/yr",
+    note: "Illustrative estimate based on current market assumptions — not guaranteed and not a contractual commitment.",
+  },
+  fundingProgress: {
+    funded: "funded",
+    investors: "investors joined",
+    apartmentsLeft: "apartments left",
   },
 };
 

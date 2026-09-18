@@ -38,6 +38,7 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
     serviceFeeRate: 1.5,
     managementFeeRate: 1,
     maintenanceFeeRate: 0.5,
+    expectedYieldRate: 7,
   });
 
   function toggleAmenity(key: string) {
@@ -57,6 +58,7 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
           serviceFeeRate: form.serviceFeeRate / 100,
           managementFeeRate: form.managementFeeRate / 100,
           maintenanceFeeRate: form.maintenanceFeeRate / 100,
+          expectedYieldRate: form.expectedYieldRate / 100,
         }),
       });
       const data = await res.json();
@@ -184,6 +186,21 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
           <div className="space-y-1.5">
             <Label>Maintenance fee (% / year)</Label>
             <Input type="number" min={0} max={20} step={0.1} value={form.maintenanceFeeRate} onChange={(e) => setForm({ ...form, maintenanceFeeRate: Number(e.target.value) })} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Expected investment return</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <p className="text-xs text-muted-foreground sm:col-span-3">
+            Estimated annual yield shown to buyers as a percentage of the apartment price (illustrative, not guaranteed).
+          </p>
+          <div className="space-y-1.5">
+            <Label>Expected yield (% / year)</Label>
+            <Input type="number" min={0} max={30} step={0.1} value={form.expectedYieldRate} onChange={(e) => setForm({ ...form, expectedYieldRate: Number(e.target.value) })} />
           </div>
         </CardContent>
       </Card>

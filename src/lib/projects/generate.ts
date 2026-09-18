@@ -1,4 +1,4 @@
-import { calculateMonthlyPayment, calculateAnnualFees } from "@/lib/finance";
+import { calculateMonthlyPayment, calculateAnnualFees, calculateExpectedYield } from "@/lib/finance";
 
 export interface ApartmentPlanInput {
   totalFloors: number;
@@ -9,6 +9,7 @@ export interface ApartmentPlanInput {
   serviceFeeRate?: number;
   managementFeeRate?: number;
   maintenanceFeeRate?: number;
+  expectedYieldRate?: number;
 }
 
 export interface GeneratedApartment {
@@ -29,6 +30,7 @@ export interface GeneratedApartment {
   serviceFeeAnnual: number;
   managementFeeAnnual: number;
   maintenanceFeeAnnual: number;
+  expectedYieldAnnual: number;
 }
 
 const WING_LETTERS = ["A", "B", "C", "D"];
@@ -39,7 +41,7 @@ const VIEWS = ["City", "Garden", "Street", "Panoramic"];
  * builder — same shape used by the seed script, so admin-created and
  * seeded projects behave identically everywhere else in the app. */
 export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApartment[] {
-  const { totalFloors, unitsPerFloor, pricePerSqm, downPaymentRatio, durationMonths, serviceFeeRate, managementFeeRate, maintenanceFeeRate } = input;
+  const { totalFloors, unitsPerFloor, pricePerSqm, downPaymentRatio, durationMonths, serviceFeeRate, managementFeeRate, maintenanceFeeRate, expectedYieldRate } = input;
   const wings = WING_LETTERS.slice(0, Math.max(1, Math.min(unitsPerFloor, WING_LETTERS.length)));
   const apartments: GeneratedApartment[] = [];
 
@@ -51,6 +53,7 @@ export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApart
       const downPayment = Math.round(price * downPaymentRatio);
       const { monthlyPaymentDisplay } = calculateMonthlyPayment({ totalPrice: price, downPayment, durationMonths });
       const fees = calculateAnnualFees({ price, serviceFeeRate, managementFeeRate, maintenanceFeeRate });
+      const expectedYieldAnnual = calculateExpectedYield({ price, yieldRate: expectedYieldRate });
 
       apartments.push({
         code: `${wing}${floor}01`,
@@ -70,6 +73,7 @@ export function generateApartmentPlan(input: ApartmentPlanInput): GeneratedApart
         serviceFeeAnnual: fees.serviceFeeAnnual,
         managementFeeAnnual: fees.managementFeeAnnual,
         maintenanceFeeAnnual: fees.maintenanceFeeAnnual,
+        expectedYieldAnnual,
       });
     });
   }

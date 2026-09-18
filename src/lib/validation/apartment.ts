@@ -12,5 +12,6 @@ export const apartmentUpdateSchema = z.object({
   serviceFeeAnnual: z.number().nonnegative(),
   managementFeeAnnual: z.number().nonnegative(),
   maintenanceFeeAnnual: z.number().nonnegative(),
+  expectedYieldAnnual: z.number().nonnegative(),
 });
 export type ApartmentUpdateInput = z.infer<typeof apartmentUpdateSchema>;

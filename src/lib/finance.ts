@@ -95,6 +95,18 @@ export interface AnnualFeesResult {
   totalAnnual: number;
 }
 
+export const DEFAULT_EXPECTED_YIELD_RATE = 0.07;
+
+export interface ExpectedYieldInput {
+  price: number;
+  yieldRate?: number;
+}
+
+export function calculateExpectedYield(input: ExpectedYieldInput): number {
+  const { price, yieldRate = DEFAULT_EXPECTED_YIELD_RATE } = input;
+  return round2(price * yieldRate);
+}
+
 export function calculateAnnualFees(input: AnnualFeesInput): AnnualFeesResult {
   const {
     price,

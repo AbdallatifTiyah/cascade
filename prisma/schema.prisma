@@ -234,6 +234,10 @@ model Apartment {
   managementFeeAnnual  Float @default(0)
   maintenanceFeeAnnual Float @default(0)
 
+  // Estimated annual investment return shown alongside the fees (Stake-style
+  // "expected yield"), expressed as a dollar amount computed from a rate.
+  expectedYieldAnnual  Float @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

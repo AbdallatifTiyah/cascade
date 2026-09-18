@@ -19,6 +19,7 @@ export interface ApartmentListItem {
   price: number;
   monthlyPayment: number;
   status: string;
+  expectedYieldAnnual?: number;
 }
 
 export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { projectSlug: string; apartments: ApartmentListItem[]; locale?: Locale }) {
@@ -104,10 +105,17 @@ export function ApartmentSelector({ projectSlug, apartments, locale = "en" }: { 
                 </p>
               </div>
               {clickable && (
-                <p className="mt-3 font-tabular text-sm font-semibold">
-                  {formatCurrency(apt.monthlyPayment)}
-                  <span className="text-xs font-normal text-muted-foreground">/mo</span>
-                </p>
+                <>
+                  <p className="mt-3 font-tabular text-sm font-semibold">
+                    {formatCurrency(apt.monthlyPayment)}
+                    <span className="text-xs font-normal text-muted-foreground">{locale === "ar" ? "/شهرياً" : "/mo"}</span>
+                  </p>
+                  {!!apt.expectedYieldAnnual && apt.price > 0 && (
+                    <p className="mt-1 font-tabular text-[11px] font-medium text-success">
+                      ~{((apt.expectedYieldAnnual / apt.price) * 100).toFixed(1)}% {locale === "ar" ? "عائد" : "yield"}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           );

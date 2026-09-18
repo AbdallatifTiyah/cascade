@@ -18,6 +18,7 @@ export interface ApartmentEditable {
   serviceFeeAnnual: number;
   managementFeeAnnual: number;
   maintenanceFeeAnnual: number;
+  expectedYieldAnnual: number;
 }
 
 export function ApartmentFeesForm({ apartment }: { apartment: ApartmentEditable }) {
@@ -31,6 +32,7 @@ export function ApartmentFeesForm({ apartment }: { apartment: ApartmentEditable 
     serviceFeeAnnual: apartment.serviceFeeAnnual,
     managementFeeAnnual: apartment.managementFeeAnnual,
     maintenanceFeeAnnual: apartment.maintenanceFeeAnnual,
+    expectedYieldAnnual: apartment.expectedYieldAnnual,
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -94,6 +96,15 @@ export function ApartmentFeesForm({ apartment }: { apartment: ApartmentEditable 
           <NumField label="Service fee ($/yr)" value={form.serviceFeeAnnual} onChange={(v) => setForm({ ...form, serviceFeeAnnual: v })} />
           <NumField label="Management fee ($/yr)" value={form.managementFeeAnnual} onChange={(v) => setForm({ ...form, managementFeeAnnual: v })} />
           <NumField label="Maintenance fee ($/yr)" value={form.maintenanceFeeAnnual} onChange={(v) => setForm({ ...form, maintenanceFeeAnnual: v })} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Expected investment return</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <NumField label="Expected annual return ($/yr)" value={form.expectedYieldAnnual} onChange={(v) => setForm({ ...form, expectedYieldAnnual: v })} />
         </CardContent>
       </Card>
 

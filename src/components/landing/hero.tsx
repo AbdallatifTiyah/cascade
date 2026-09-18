@@ -2,11 +2,24 @@ import { LinkButton } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary, isRtl } from "@/lib/i18n";
+import { db } from "@/lib/db";
 
-export function Hero() {
+export async function Hero() {
   const locale = getLocale();
   const t = getDictionary(locale).landing;
   const rtl = isRtl(locale);
+
+  const [activeProjects, investorCount, availableApartments] = await Promise.all([
+    db.project.count({ where: { status: { notIn: ["DRAFT"] } } }),
+    db.projectParticipant.count(),
+    db.apartment.count({ where: { status: "AVAILABLE" } }),
+  ]);
+
+  const stats = [
+    { value: activeProjects, label: t.heroStats.projects },
+    { value: investorCount, label: t.heroStats.investors },
+    { value: availableApartments, label: t.heroStats.apartments },
+  ];
 
   return (
     <section className="relative overflow-hidden border-b border-border">
@@ -29,6 +42,15 @@ export function Hero() {
           </LinkButton>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">{t.heroNote}</p>
+
+        <div className="mx-auto mt-14 grid max-w-lg grid-cols-3 gap-4 border-t border-border pt-8">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <p className="font-tabular text-2xl font-semibold sm:text-3xl">{s.value.toLocaleString(locale === "ar" ? "ar" : "en-US")}</p>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{s.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
