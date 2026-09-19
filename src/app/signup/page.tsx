@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { SignupForm } from "@/components/auth/signup-form";
 import { getLocale } from "@/lib/i18n/get-locale";
@@ -6,7 +8,10 @@ import { getDictionary } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Build My Property Plan" };
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const session = await auth();
+  if (session?.user) redirect(session.user.role === "ADMIN" ? "/admin" : "/profile");
+
   const t = getDictionary(getLocale());
 
   return (

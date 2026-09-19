@@ -42,7 +42,8 @@ export async function POST(request: Request) {
     data: {
       name: data.name,
       slug,
-      description: data.description,
+      descriptionEn: data.descriptionEn,
+      descriptionAr: data.descriptionAr,
       locationId: data.locationId,
       landId: data.landId || null,
       status: data.status,

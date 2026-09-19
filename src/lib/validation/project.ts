@@ -5,7 +5,8 @@ const statusValues = PROJECT_STATUSES as unknown as [string, ...string[]];
 
 export const projectCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  description: z.string().trim().min(1).max(2000),
+  descriptionEn: z.string().trim().min(1).max(2000),
+  descriptionAr: z.string().trim().min(1).max(2000),
   locationId: z.string().min(1),
   landId: z.string().optional().or(z.literal("")),
   status: z.enum(statusValues).default("PLANNING"),

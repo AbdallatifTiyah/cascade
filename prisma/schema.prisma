@@ -172,7 +172,8 @@ model Project {
   id                       String   @id @default(cuid())
   name                     String
   slug                     String   @unique
-  description              String
+  descriptionEn            String
+  descriptionAr            String
   locationId               String
   location                 Location @relation(fields: [locationId], references: [id])
   landId                   String?

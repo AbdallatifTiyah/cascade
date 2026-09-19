@@ -22,7 +22,8 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
-    description: "",
+    descriptionEn: "",
+    descriptionAr: "",
     locationId: locations[0]?.id ?? "",
     landId: "",
     status: "PLANNING",
@@ -93,10 +94,17 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
             <Label htmlFor="name">Project name</Label>
             <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <div className="space-y-1.5">
+            <Label htmlFor="descriptionEn">Description (English)</Label>
+            <Textarea id="descriptionEn" required value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="descriptionAr">الوصف (عربي)</Label>
+            <Textarea id="descriptionAr" dir="rtl" required value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} />
+          </div>
+          <p className="text-xs text-muted-foreground sm:col-span-2">
+            Shown on the project page in whichever language the visitor has selected.
+          </p>
           <div className="space-y-1.5">
             <Label htmlFor="locationId">Location</Label>
             <Select id="locationId" required value={form.locationId} onChange={(e) => setForm({ ...form, locationId: e.target.value })}>

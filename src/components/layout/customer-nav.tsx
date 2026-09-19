@@ -76,6 +76,13 @@ export function CustomerNav({ locale, t }: { locale: Locale; t: Dictionary }) {
           <Link href="/notifications" className="rounded-full p-2 text-muted-foreground" aria-label={t.nav.notifications}>
             <Bell className="h-5 w-5" />
           </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="rounded-full p-2 text-muted-foreground"
+            aria-label={t.nav.logout}
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

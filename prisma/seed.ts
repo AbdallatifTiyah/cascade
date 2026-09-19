@@ -293,7 +293,8 @@ async function main() {
       data: {
         name: p.name,
         slug: p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-        description: `${p.name} is a Cascade group-development project in ${p.location}. Participants join the project, and apartments are allocated as the group forms — from land acquisition through design, construction, and handover.`,
+        descriptionEn: `${p.name} is a Cascade group-development project in ${p.location}. Participants join the project, and apartments are allocated as the group forms — from land acquisition through design, construction, and handover.`,
+        descriptionAr: `${p.name} هو مشروع تطوير جماعي من كاسكيد في ${p.location}. ينضم المشاركون إلى المشروع، ويتم تخصيص الشقق مع تشكّل المجموعة — من تملّك الأرض مرورًا بالتصميم والبناء وحتى التسليم.`,
         locationId: locByName[p.location].id,
         landId: land?.id,
         status: p.status,

@@ -73,7 +73,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </LinkButton>
       </div>
 
-      <p className="max-w-3xl leading-relaxed text-muted-foreground">{project.description}</p>
+      <p className="max-w-3xl leading-relaxed text-muted-foreground">
+        {(locale === "ar" ? project.descriptionAr : project.descriptionEn) || project.descriptionEn || project.descriptionAr}
+      </p>
 
       <Card>
         <CardContent className="p-5">
