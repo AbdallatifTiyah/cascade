@@ -18,7 +18,7 @@ export const projectCreateSchema = z.object({
   constructionCostEstimate: z.number().nonnegative(),
   otherCostsEstimate: z.number().nonnegative(),
   pricePerSqm: z.number().positive(),
-  downPaymentRatio: z.number().min(0.05).max(0.9),
+  downPaymentAmount: z.number().positive(),
   durationMonths: z.number().int().positive().max(240),
   serviceFeeRate: z.number().min(0).max(0.2).default(0.015),
   managementFeeRate: z.number().min(0).max(0.2).default(0.01),

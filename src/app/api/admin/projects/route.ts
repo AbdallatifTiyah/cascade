@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     totalFloors: data.totalFloors,
     unitsPerFloor: data.unitsPerFloor,
     pricePerSqm: data.pricePerSqm,
-    downPaymentRatio: data.downPaymentRatio,
+    downPaymentAmount: data.downPaymentAmount,
     durationMonths: data.durationMonths,
     serviceFeeRate: data.serviceFeeRate,
     managementFeeRate: data.managementFeeRate,

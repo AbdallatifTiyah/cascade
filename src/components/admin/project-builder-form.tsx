@@ -8,6 +8,8 @@ import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/onboarding/option-card";
 import { AMENITIES, COVER_THEMES, PROJECT_STATUSES } from "@/lib/constants";
+import { totalBuildingArea } from "@/lib/projects/generate";
+import { formatCurrency } from "@/lib/currency";
 
 interface Option {
   id: string;
@@ -32,8 +34,8 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
     landCostEstimate: 200000,
     constructionCostEstimate: 400000,
     otherCostsEstimate: 50000,
-    pricePerSqm: 300,
-    downPaymentRatio: 0.2,
+    markupRate: 17.5,
+    downPaymentAmount: 30000,
     durationMonths: 84,
     serviceFeeRate: 1.5,
     managementFeeRate: 1,
@@ -45,6 +47,11 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
     setForm((f) => ({ ...f, amenities: f.amenities.includes(key) ? f.amenities.filter((a) => a !== key) : [...f.amenities, key] }));
   }
 
+  const totalArea = totalBuildingArea(form.totalFloors, form.unitsPerFloor);
+  const totalCost = form.landCostEstimate + form.constructionCostEstimate + form.otherCostsEstimate;
+  const totalCostWithMarkup = totalCost * (1 + form.markupRate / 100);
+  const pricePerSqm = totalArea > 0 ? Math.round(totalCostWithMarkup / totalArea) : 0;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -55,6 +62,7 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          pricePerSqm,
           serviceFeeRate: form.serviceFeeRate / 100,
           managementFeeRate: form.managementFeeRate / 100,
           maintenanceFeeRate: form.maintenanceFeeRate / 100,
@@ -159,10 +167,21 @@ export function ProjectBuilderForm({ locations, lands }: { locations: Option[]; 
           <NumField label="Land cost estimate ($)" value={form.landCostEstimate} onChange={(v) => setForm({ ...form, landCostEstimate: v })} />
           <NumField label="Construction cost estimate ($)" value={form.constructionCostEstimate} onChange={(v) => setForm({ ...form, constructionCostEstimate: v })} />
           <NumField label="Other costs estimate ($)" value={form.otherCostsEstimate} onChange={(v) => setForm({ ...form, otherCostsEstimate: v })} />
-          <NumField label="Price per m² ($)" value={form.pricePerSqm} onChange={(v) => setForm({ ...form, pricePerSqm: v })} />
           <div className="space-y-1.5">
-            <Label>Down payment ratio</Label>
-            <Input type="number" min={0.05} max={0.9} step={0.05} value={form.downPaymentRatio} onChange={(e) => setForm({ ...form, downPaymentRatio: Number(e.target.value) })} />
+            <Label>Admin / management markup (%)</Label>
+            <Input type="number" min={0} max={100} step={0.5} value={form.markupRate} onChange={(e) => setForm({ ...form, markupRate: Number(e.target.value) })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Down payment amount ($)</Label>
+            <Input type="number" min={0} step={500} value={form.downPaymentAmount} onChange={(e) => setForm({ ...form, downPaymentAmount: Number(e.target.value) })} />
+            <p className="text-xs text-muted-foreground">Applied to every generated unit; editable per apartment afterward.</p>
+          </div>
+          <div className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
+            <Label>Price per m² (calculated)</Label>
+            <p className="font-tabular text-lg font-semibold">{formatCurrency(pricePerSqm)}</p>
+            <p className="text-xs text-muted-foreground">
+              ({formatCurrency(totalCost)} costs × {(1 + form.markupRate / 100).toFixed(3)}) ÷ {totalArea.toLocaleString()} m² total area
+            </p>
           </div>
         </CardContent>
       </Card>
